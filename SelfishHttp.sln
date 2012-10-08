@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SelfishHttp", "SelfishHttp\SelfishHttp.csproj", "{CBC4B18A-A94C-4512-96A7-3465BD5BA20E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SelfishHttp.Test", "SelfishHttp.Test\SelfishHttp.Test.csproj", "{446C93C9-8FAE-4FD5-8A00-56118DF1A82C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CBC4B18A-A94C-4512-96A7-3465BD5BA20E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CBC4B18A-A94C-4512-96A7-3465BD5BA20E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CBC4B18A-A94C-4512-96A7-3465BD5BA20E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CBC4B18A-A94C-4512-96A7-3465BD5BA20E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{446C93C9-8FAE-4FD5-8A00-56118DF1A82C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{446C93C9-8FAE-4FD5-8A00-56118DF1A82C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{446C93C9-8FAE-4FD5-8A00-56118DF1A82C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{446C93C9-8FAE-4FD5-8A00-56118DF1A82C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

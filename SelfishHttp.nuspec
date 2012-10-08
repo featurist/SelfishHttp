@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>SelfishHttp</id>
+    <version>0.0.1</version>
+    <authors>Tim Macfarlane</authors>
+    <owners>Tim Macfarlane</owners>
+    <projectUrl>https://github.com/featurist/SelfishHttp</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>self hosting HTTP server for testing</description>
+    <releaseNotes>First version.</releaseNotes>
+    <copyright>Copyright 2012</copyright>
+    <tags>http</tags>
+  </metadata>
+  <files>
+    <file src="SelfishHttp\bin\Debug\SelfishHttp.dll" target="lib\net40" />
+  </files>
+</package>

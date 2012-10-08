@@ -1,0 +1,9 @@
+*/bin
+*/obj
+/packages
+_ReSharper.*/
+.*.sw[op]
+*.suo
+*.user
+StyleCop.Cache
+*.nupkg
