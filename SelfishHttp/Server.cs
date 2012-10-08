@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -24,6 +23,11 @@ namespace SelfishHttp
             _listener = new HttpListener();
             _listener.Prefixes.Add(String.Format("http://localhost:{0}/", port));
             _listener.Start();
+            HandleNextRequest();
+        }
+
+        private void HandleNextRequest()
+        {
             _listener.BeginGetContext(OnRequest, null);
         }
 
@@ -34,6 +38,7 @@ namespace SelfishHttp
 
         private void OnRequest(IAsyncResult ar)
         {
+            HandleNextRequest();
             var context = _listener.EndGetContext(ar);
             HttpListenerRequest req = context.Request;
             HttpListenerResponse res = context.Response;
@@ -46,42 +51,8 @@ namespace SelfishHttp
             } else
             {
                 res.StatusCode = 404;
-                res.OutputStream.Close();
+                res.Close();
             }
-        }
-    }
-
-    public static class StringHandlerExtensions
-    {
-        public static IHttpHandler RespondWith(this IHttpHandler handler, string respondWith)
-        {
-            handler.Respond = (req, res) =>
-                                              {
-                                                  using (var writer = new StreamWriter(res.OutputStream))
-                                                  {
-                                                      writer.Write(respondWith);
-                                                  }
-                                              };
-
-            return handler;
-        }
-    }
-
-    public interface IHttpHandler
-    {
-        bool Matches(HttpListenerRequest request);
-        Action<HttpListenerRequest, HttpListenerResponse> Respond { get; set; }
-    }
-
-    public class MethodPathHttpHandler : IHttpHandler
-    {
-        public string Method;
-        public string Path;
-        public Action<HttpListenerRequest, HttpListenerResponse> Respond { get; set; }
-
-        public bool Matches(HttpListenerRequest request)
-        {
-            return request.HttpMethod == Method && request.RawUrl == Path;
         }
     }
 }

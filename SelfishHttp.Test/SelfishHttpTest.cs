@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Net.Http;
+using System.Threading;
 using NUnit.Framework;
 
 namespace SelfishHttp.Test
@@ -30,6 +31,17 @@ namespace SelfishHttp.Test
             var client = new HttpClient();
             var response = client.GetAsync("http://localhost:12345/stuff").Result.Content.ReadAsStringAsync().Result;
             Assert.That(response, Is.EqualTo("yes, this is stuff"));
+        }
+
+        [Test]
+        public void ShouldRedirectToAnotherUrl()
+        {
+            _server.OnGet("/stuff").RedirectTo("/otherstuff");
+            _server.OnGet("/otherstuff").RespondWith("yes, this is other stuff");
+
+            var client = new HttpClient();
+            var response = client.GetAsync("http://localhost:12345/stuff").Result.Content.ReadAsStringAsync().Result;
+            Assert.That(response, Is.EqualTo("yes, this is other stuff"));
         }
 
         [Test]
