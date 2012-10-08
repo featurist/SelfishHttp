@@ -21,12 +21,32 @@ namespace SelfishHttp
 
         public IHttpHandler OnGet(string path)
         {
-            var httpHandler = new MethodPathHttpHandler { Method = "GET", Path = path };
+            return AddHttpHandler("GET", path);
+        }
+
+        public IHttpHandler OnPut(string path)
+        {
+            return AddHttpHandler("PUT", path);
+        }
+
+        public IHttpHandler OnPost(string path)
+        {
+            return AddHttpHandler("POST", path);
+        }
+
+        public IHttpHandler OnDelete(string path)
+        {
+            return AddHttpHandler("DELETE", path);
+        }
+
+        private IHttpHandler AddHttpHandler(string method, string path)
+        {
+            var httpHandler = new MethodPathHttpHandler {Method = method, Path = path};
             _handlers.Add(httpHandler);
             return httpHandler;
         }
 
-        public void Start(int port)
+        private void Start(int port)
         {
             _listener = new HttpListener();
             _listener.Prefixes.Add(BaseUrl);

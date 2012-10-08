@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 
 namespace SelfishHttp
@@ -11,6 +12,26 @@ namespace SelfishHttp
                                       using (var writer = new StreamWriter(res.OutputStream))
                                       {
                                           writer.Write(respondWith);
+                                      }
+                                  };
+
+            return handler;
+        }
+
+        public static IHttpHandler RespondWith(this IHttpHandler handler, Func<string, string> responseFromRequest)
+        {
+            handler.Respond = (req, res) =>
+                                  {
+                                      string requestBody;
+
+                                      using (var reader = new StreamReader(req.InputStream))
+                                      {
+                                          requestBody = reader.ReadToEnd();
+                                      }
+
+                                      using (var writer = new StreamWriter(res.OutputStream))
+                                      {
+                                          writer.Write(responseFromRequest(requestBody));
                                       }
                                   };
 

@@ -50,5 +50,35 @@ namespace SelfishHttp.Test
             var statusCode = client.GetAsync("http://localhost:12345/stuff").Result.StatusCode;
             Assert.That(statusCode, Is.EqualTo(HttpStatusCode.NotFound));
         }
+
+        [Test]
+        public void ShouldAcceptPut()
+        {
+            _server.OnPut("/putsomethinghere").RespondWith(body => body);
+
+            var client = new HttpClient();
+            var response = client.PutAsync("http://localhost:12345/putsomethinghere", new StringContent("something to put")).Result.Content.ReadAsStringAsync().Result;
+            Assert.That(response, Is.EqualTo("something to put"));
+        }
+
+        [Test]
+        public void ShouldAcceptPost()
+        {
+            _server.OnPost("/postsomethinghere").RespondWith(body => body);
+
+            var client = new HttpClient();
+            var response = client.PostAsync("http://localhost:12345/postsomethinghere", new StringContent("something to post")).Result.Content.ReadAsStringAsync().Result;
+            Assert.That(response, Is.EqualTo("something to post"));
+        }
+
+        [Test]
+        public void ShouldAcceptDelete()
+        {
+            _server.OnDelete("/deletethis").RespondWith("deleted it");
+
+            var client = new HttpClient();
+            var response = client.DeleteAsync("http://localhost:12345/deletethis").Result.Content.ReadAsStringAsync().Result;
+            Assert.That(response, Is.EqualTo("deleted it"));
+        }
     }
 }
