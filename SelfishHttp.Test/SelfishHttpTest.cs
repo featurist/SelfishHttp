@@ -13,8 +13,7 @@ namespace SelfishHttp.Test
         [SetUp]
         public void SetUp()
         {
-            _server = new Server();
-            _server.Start(12345);
+            _server = new Server(12345);
         }
 
         [TearDown]

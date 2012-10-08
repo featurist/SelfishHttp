@@ -6,10 +6,18 @@ using System.Text;
 
 namespace SelfishHttp
 {
-    public class Server
+    public class Server : IDisposable
     {
         private HttpListener _listener;
         private List<IHttpHandler> _handlers = new List<IHttpHandler>();
+
+        public Server(int port)
+        {
+            BaseUrl = String.Format("http://localhost:{0}/", port);
+            Start(port);
+        }
+
+        public string BaseUrl { get; private set; }
 
         public IHttpHandler OnGet(string path)
         {
@@ -21,7 +29,7 @@ namespace SelfishHttp
         public void Start(int port)
         {
             _listener = new HttpListener();
-            _listener.Prefixes.Add(String.Format("http://localhost:{0}/", port));
+            _listener.Prefixes.Add(BaseUrl);
             _listener.Start();
             HandleNextRequest();
         }
@@ -53,6 +61,11 @@ namespace SelfishHttp
                 res.StatusCode = 404;
                 res.Close();
             }
+        }
+
+        public void Dispose()
+        {
+            Stop();
         }
     }
 }
