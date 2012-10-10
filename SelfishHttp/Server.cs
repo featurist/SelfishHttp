@@ -14,7 +14,7 @@ namespace SelfishHttp
         public Server(int port)
         {
             BaseUrl = String.Format("http://localhost:{0}/", port);
-            Start(port);
+            Start();
         }
 
         public string BaseUrl { get; private set; }
@@ -46,7 +46,7 @@ namespace SelfishHttp
             return httpHandler;
         }
 
-        private void Start(int port)
+        private void Start()
         {
             _listener = new HttpListener();
             _listener.Prefixes.Add(BaseUrl);
@@ -66,20 +66,32 @@ namespace SelfishHttp
 
         private void OnRequest(IAsyncResult ar)
         {
-            HandleNextRequest();
-            var context = _listener.EndGetContext(ar);
-            HttpListenerRequest req = context.Request;
-            HttpListenerResponse res = context.Response;
-
-            var handler = _handlers.FirstOrDefault(h => h.Matches(req));
-
-            if (handler != null)
+            if (_listener.IsListening)
             {
-                handler.Respond(req, res);
-            } else
-            {
-                res.StatusCode = 404;
-                res.Close();
+                HandleNextRequest();
+                var context = _listener.EndGetContext(ar);
+                HttpListenerRequest req = context.Request;
+                HttpListenerResponse res = context.Response;
+
+                var handler = _handlers.FirstOrDefault(h => h.Matches(req));
+
+                if (handler != null)
+                {
+                    try
+                    {
+                        handler.Respond(req, res);
+                    }
+                    catch (Exception e)
+                    {
+                        res.StatusCode = 500;
+                        res.Close();
+                    }
+                }
+                else
+                {
+                    res.StatusCode = 404;
+                    res.Close();
+                }
             }
         }
 

@@ -29,9 +29,11 @@ namespace SelfishHttp
                                           requestBody = reader.ReadToEnd();
                                       }
 
+                                      var responseBody = responseFromRequest(requestBody);
+
                                       using (var writer = new StreamWriter(res.OutputStream))
                                       {
-                                          writer.Write(responseFromRequest(requestBody));
+                                          writer.Write(responseBody);
                                       }
                                   };
 

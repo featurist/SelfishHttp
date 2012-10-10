@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.Http;
 using System.Threading;
 using NUnit.Framework;
@@ -79,6 +80,16 @@ namespace SelfishHttp.Test
             var client = new HttpClient();
             var response = client.DeleteAsync("http://localhost:12345/deletethis").Result.Content.ReadAsStringAsync().Result;
             Assert.That(response, Is.EqualTo("deleted it"));
+        }
+
+        [Test]
+        public void Returns500WhenResponseHandlerThrowsException()
+        {
+            _server.OnGet("/error").RespondWith(body => { throw new Exception("bad stuff!"); });
+
+            var client = new HttpClient();
+            var response = client.GetAsync("http://localhost:12345/error").Result;
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.InternalServerError));
         }
     }
 }
