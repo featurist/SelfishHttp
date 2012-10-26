@@ -41,8 +41,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IHttpHandler.cs" />
+    <Compile Include="IRequest.cs" />
+    <Compile Include="IResponse.cs" />
     <Compile Include="MethodPathHttpHandler.cs" />
     <Compile Include="RedirectHandlerExtensions.cs" />
+    <Compile Include="Request.cs" />
+    <Compile Include="RequestResponseHandlerExtensions.cs" />
+    <Compile Include="Response.cs" />
     <Compile Include="Server.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StringHandlerExtensions.cs" />

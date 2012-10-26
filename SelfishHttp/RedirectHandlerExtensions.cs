@@ -4,7 +4,7 @@ namespace SelfishHttp
     {
         public static IHttpHandler RedirectTo(this IHttpHandler handler, string path)
         {
-            handler.Respond = (req, res) =>
+            handler.Handle = (req, res) =>
                                   {
                                       res.Redirect(path);
                                       res.Close();

@@ -7,7 +7,7 @@ namespace SelfishHttp
     {
         public static IHttpHandler RespondWith(this IHttpHandler handler, string respondWith)
         {
-            handler.Respond = (req, res) =>
+            handler.Handle = (req, res) =>
                                   {
                                       using (var writer = new StreamWriter(res.OutputStream))
                                       {
@@ -20,7 +20,7 @@ namespace SelfishHttp
 
         public static IHttpHandler RespondWith(this IHttpHandler handler, Func<string, string> responseFromRequest)
         {
-            handler.Respond = (req, res) =>
+            handler.Handle = (req, res) =>
                                   {
                                       string requestBody;
 

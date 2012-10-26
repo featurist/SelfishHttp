@@ -7,3 +7,4 @@ _ReSharper.*/
 *.user
 StyleCop.Cache
 *.nupkg
+publish.bat

@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>SelfishHttp</id>
-    <version>0.0.6</version>
+    <version>0.0.7</version>
     <authors>Tim Macfarlane</authors>
     <owners>Tim Macfarlane</owners>
     <projectUrl>https://github.com/featurist/SelfishHttp</projectUrl>

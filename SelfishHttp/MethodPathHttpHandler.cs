@@ -7,7 +7,7 @@ namespace SelfishHttp
     {
         public string Method;
         public string Path;
-        public Action<HttpListenerRequest, HttpListenerResponse> Respond { get; set; }
+        public Action<HttpListenerRequest, HttpListenerResponse> Handle { get; set; }
 
         public bool Matches(HttpListenerRequest request)
         {

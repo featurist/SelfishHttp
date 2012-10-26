@@ -79,9 +79,9 @@ namespace SelfishHttp
                 {
                     try
                     {
-                        handler.Respond(req, res);
+                        handler.Handle(req, res);
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
                         res.StatusCode = 500;
                         res.Close();

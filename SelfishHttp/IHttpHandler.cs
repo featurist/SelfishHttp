@@ -6,6 +6,6 @@ namespace SelfishHttp
     public interface IHttpHandler
     {
         bool Matches(HttpListenerRequest request);
-        Action<HttpListenerRequest, HttpListenerResponse> Respond { get; set; }
+        Action<HttpListenerRequest, HttpListenerResponse> Handle { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -90,6 +91,38 @@ namespace SelfishHttp.Test
             var client = new HttpClient();
             var response = client.GetAsync("http://localhost:12345/error").Result;
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.InternalServerError));
+        }
+
+        [Test]
+        public void CanInspectTheRequestHeaders()
+        {
+            _server.OnGet("/arequest").Respond((req, res) =>
+                                                       {
+                                                           res.Body = req.Headers["X-Custom"];
+                                                       });
+
+            var client = new HttpClient();
+
+            var message = new HttpRequestMessage(HttpMethod.Get, "http://localhost:12345/arequest");
+            message.Headers.Add("X-Custom", "hi!");
+            var response = client.SendAsync(message).Result;
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(response.Content.ReadAsStringAsync().Result, Is.EqualTo("hi!"));
+        }
+
+        [Test]
+        public void CanSetResponseHeaders()
+        {
+            _server.OnGet("/arequest").Respond((req, res) =>
+                                                       {
+                                                           res.Headers["X-Custom"] = "hello there!";
+                                                       });
+
+            var client = new HttpClient();
+
+            var response = client.GetAsync("http://localhost:12345/arequest").Result;
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(response.Headers.GetValues("X-Custom").Single(), Is.EqualTo("hello there!"));
         }
     }
 }
