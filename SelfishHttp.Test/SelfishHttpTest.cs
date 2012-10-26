@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -136,6 +137,52 @@ namespace SelfishHttp.Test
             var response = client.SendAsync(message).Result;
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
             Assert.That(response.Headers.GetValues("X-Head-Received").Single(), Is.EqualTo("true"));
+        }
+
+        [Test]
+        public void AllowsAuthencatedRequestsToProtectedResourcesWithCorrectCredentials()
+        {
+            _server.OnGet("/private").ProtectedWithBasicAuth("username", "password").RespondWith("this is private!");
+
+            var response = RequestWithBasicAuth("http://10.18.9.62:12345/private", "username", "password");
+
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            using (var reader = new StreamReader(response.GetResponseStream()))
+            {
+                Assert.That(reader.ReadToEnd(), Is.EqualTo("this is private!"));
+            }
+        }
+
+        [Test]
+        public void DisallowsAuthencatedRequestsToProtectedResourcesWithIncorrectCredentials()
+        {
+            _server.OnGet("/private").ProtectedWithBasicAuth("username", "password").RespondWith("this is private!");
+
+            try
+            {
+                var response = RequestWithBasicAuth("http://10.18.9.62:12345/private", "username", "badpassword");
+            } catch (WebException we)
+            {
+                Assert.That(we.Response, Is.Not.Null);
+                var response = (HttpWebResponse) we.Response;
+                Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
+                using (var reader = new StreamReader(response.GetResponseStream()))
+                {
+                    Assert.That(reader.ReadToEnd(), Is.EqualTo(""));
+                }
+            }
+        }
+
+        private static HttpWebResponse RequestWithBasicAuth(string requestUriString, string userName, string password)
+        {
+            var request = (HttpWebRequest) WebRequest.Create(requestUriString);
+            request.Proxy = new WebProxy("http://localhost:8888/", false);
+            var credentialCache = new CredentialCache();
+            credentialCache.Add(new Uri(new Uri(requestUriString).GetLeftPart(UriPartial.Authority)), "Basic", new NetworkCredential(userName, password));
+            request.Credentials = credentialCache;
+            request.PreAuthenticate = true;
+            var response = (HttpWebResponse) request.GetResponse();
+            return response;
         }
     }
 }

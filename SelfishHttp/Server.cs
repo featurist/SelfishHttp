@@ -13,7 +13,7 @@ namespace SelfishHttp
 
         public Server(int port)
         {
-            BaseUrl = String.Format("http://localhost:{0}/", port);
+            BaseUrl = String.Format("http://*:{0}/", port);
             Start();
         }
 
@@ -55,8 +55,19 @@ namespace SelfishHttp
         {
             _listener = new HttpListener();
             _listener.Prefixes.Add(BaseUrl);
+            _listener.AuthenticationSchemeSelectorDelegate = AuthenticationSchemeSelectorDelegate;
             _listener.Start();
             HandleNextRequest();
+        }
+
+        private AuthenticationSchemes AuthenticationSchemeSelectorDelegate(HttpListenerRequest httpRequest)
+        {
+            var handler = _handlers.FirstOrDefault(h => h.Matches(httpRequest));
+            if (handler != null)
+            {
+                return handler.AuthenticationSchemeFor(httpRequest);
+            }
+            return AuthenticationSchemes.Anonymous;
         }
 
         private void HandleNextRequest()
@@ -84,7 +95,7 @@ namespace SelfishHttp
                 {
                     try
                     {
-                        handler.Handle(req, res);
+                        handler.Handle(context);
                     }
                     catch (Exception)
                     {

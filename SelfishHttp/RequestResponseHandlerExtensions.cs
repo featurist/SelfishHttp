@@ -7,11 +7,7 @@ namespace SelfishHttp
     {
         public static IHttpHandler Respond(this IHttpHandler handler, Action<IRequest, IResponse> handleRequest)
         {
-            handler.Handle = (req, res) =>
-                                  {
-                                      handleRequest(new Request(req), new Response(res));
-                                      res.Close();
-                                  };
+            handler.Handlers.Add((context, next) => handleRequest(new Request(context.Request), new Response(context.Response)));
 
             return handler;
         }

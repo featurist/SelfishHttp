@@ -7,35 +7,35 @@ namespace SelfishHttp
     {
         public static IHttpHandler RespondWith(this IHttpHandler handler, string respondWith)
         {
-            handler.Handle = (req, res) =>
+            handler.Handlers.Add((context, next) =>
                                   {
-                                      using (var writer = new StreamWriter(res.OutputStream))
+                                      using (var writer = new StreamWriter(context.Response.OutputStream))
                                       {
                                           writer.Write(respondWith);
                                       }
-                                  };
+                                  });
 
             return handler;
         }
 
         public static IHttpHandler RespondWith(this IHttpHandler handler, Func<string, string> responseFromRequest)
         {
-            handler.Handle = (req, res) =>
+            handler.Handlers.Add((context, next) =>
                                   {
                                       string requestBody;
 
-                                      using (var reader = new StreamReader(req.InputStream))
+                                      using (var reader = new StreamReader(context.Request.InputStream))
                                       {
                                           requestBody = reader.ReadToEnd();
                                       }
 
                                       var responseBody = responseFromRequest(requestBody);
 
-                                      using (var writer = new StreamWriter(res.OutputStream))
+                                      using (var writer = new StreamWriter(context.Response.OutputStream))
                                       {
                                           writer.Write(responseBody);
                                       }
-                                  };
+                                  });
 
             return handler;
         }
