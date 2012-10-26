@@ -7,6 +7,7 @@ namespace SelfishHttp
     public interface IRequest
     {
         string Url { get; }
+        string Method { get; }
         WebHeaderCollection Headers { get; }
         dynamic Body { get; }
     }

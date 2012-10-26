@@ -124,5 +124,18 @@ namespace SelfishHttp.Test
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
             Assert.That(response.Headers.GetValues("X-Custom").Single(), Is.EqualTo("hello there!"));
         }
+
+        [Test]
+        public void CanRespondToHeadRequest()
+        {
+            _server.OnHead("/head").Respond((req, res) => { res.Headers["X-Head-Received"] = req.Method == "HEAD"? "true": "false"; });
+
+            var client = new HttpClient();
+
+            var message = new HttpRequestMessage(HttpMethod.Head, "http://localhost:12345/head");
+            var response = client.SendAsync(message).Result;
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(response.Headers.GetValues("X-Head-Received").Single(), Is.EqualTo("true"));
+        }
     }
 }

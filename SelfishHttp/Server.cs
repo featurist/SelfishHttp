@@ -24,6 +24,11 @@ namespace SelfishHttp
             return AddHttpHandler("GET", path);
         }
 
+        public IHttpHandler OnHead(string path)
+        {
+            return AddHttpHandler("HEAD", path);
+        }
+
         public IHttpHandler OnPut(string path)
         {
             return AddHttpHandler("PUT", path);

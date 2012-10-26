@@ -11,13 +11,15 @@ namespace SelfishHttp
         public Request(HttpListenerRequest req)
         {
             Url = req.Url.ToString();
+            Method = req.HttpMethod;
             Headers = (WebHeaderCollection) req.Headers;
             Body = new DynamicBody(req.InputStream);
         }
 
-        public string Url { get; set; }
+        public string Url { get; private set; }
+        public string Method { get; private set; }
         public WebHeaderCollection Headers { get; private set; }
-        public dynamic Body { get; set; }
+        public dynamic Body { get; private set; }
     }
 
     public class DynamicBody : DynamicObject
