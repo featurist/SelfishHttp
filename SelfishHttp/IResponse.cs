@@ -9,6 +9,6 @@ namespace SelfishHttp
     {
         int StatusCode { get; set; }
         WebHeaderCollection Headers { get; }
-        dynamic Body { set; }
+        object Body { set; }
     }
 }

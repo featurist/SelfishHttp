@@ -9,6 +9,7 @@ namespace SelfishHttp
         bool Matches(HttpListenerRequest request);
         IList<Action<HttpListenerContext, Action>> Handlers { get; }
         AuthenticationSchemes AuthenticationScheme { get; set; }
+        IServerConfiguration ServerConfiguration { get; }
         void Handle(HttpListenerContext context);
         AuthenticationSchemes AuthenticationSchemeFor(HttpListenerRequest httpRequest);
     }

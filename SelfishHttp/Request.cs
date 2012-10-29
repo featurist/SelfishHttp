@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.IO;
@@ -8,18 +9,28 @@ namespace SelfishHttp
 {
     public class Request : IRequest
     {
-        public Request(HttpListenerRequest req)
+        private readonly IBodyParser _bodyParsers;
+        private readonly HttpListenerRequest _reqest;
+
+        public Request(IBodyParser bodyParsers, HttpListenerRequest reqest)
         {
-            Url = req.Url.ToString();
-            Method = req.HttpMethod;
-            Headers = (WebHeaderCollection) req.Headers;
-            Body = new DynamicBody(req.InputStream);
+            _bodyParsers = bodyParsers;
+            _reqest = reqest;
+            Url = reqest.Url.ToString();
+            Method = reqest.HttpMethod;
+            Headers = (WebHeaderCollection) reqest.Headers;
+            Body = new DynamicBody(reqest.InputStream);
         }
 
         public string Url { get; private set; }
         public string Method { get; private set; }
         public WebHeaderCollection Headers { get; private set; }
         public dynamic Body { get; private set; }
+
+        public T BodyAs<T>()
+        {
+            return (T) _bodyParsers.ParseBody<T>(_reqest.InputStream);
+        }
     }
 
     public class DynamicBody : DynamicObject

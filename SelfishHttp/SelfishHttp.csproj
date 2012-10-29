@@ -40,9 +40,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BodyParsers.cs" />
+    <Compile Include="BodyWriters.cs" />
+    <Compile Include="IBodyParser.cs" />
+    <Compile Include="IBodyWriter.cs" />
     <Compile Include="IHttpHandler.cs" />
     <Compile Include="IRequest.cs" />
     <Compile Include="IResponse.cs" />
+    <Compile Include="IServerConfiguration.cs" />
     <Compile Include="MethodPathHttpHandler.cs" />
     <Compile Include="RedirectHandlerExtensions.cs" />
     <Compile Include="Request.cs" />

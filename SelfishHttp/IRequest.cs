@@ -10,5 +10,6 @@ namespace SelfishHttp
         string Method { get; }
         WebHeaderCollection Headers { get; }
         dynamic Body { get; }
+        T BodyAs<T>();
     }
 }

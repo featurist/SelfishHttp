@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading;
 using NUnit.Framework;
 
@@ -144,7 +145,7 @@ namespace SelfishHttp.Test
         {
             _server.OnGet("/private").ProtectedWithBasicAuth("username", "password").RespondWith("this is private!");
 
-            var response = RequestWithBasicAuth("http://10.18.9.62:12345/private", "username", "password");
+            var response = RequestWithBasicAuth("http://localhost:12345/private", "username", "password");
 
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
             using (var reader = new StreamReader(response.GetResponseStream()))
@@ -160,7 +161,7 @@ namespace SelfishHttp.Test
 
             try
             {
-                var response = RequestWithBasicAuth("http://10.18.9.62:12345/private", "username", "badpassword");
+                RequestWithBasicAuth("http://localhost:12345/private", "username", "badpassword");
             } catch (WebException we)
             {
                 Assert.That(we.Response, Is.Not.Null);
@@ -171,6 +172,74 @@ namespace SelfishHttp.Test
                     Assert.That(reader.ReadToEnd(), Is.EqualTo(""));
                 }
             }
+        }
+
+        [Test]
+        public void RequestBodyCanBeAString()
+        {
+            string body = null;
+
+            _server.OnPost("/post").Respond((req, res) =>
+                                                {
+                                                    body = req.BodyAs<string>();
+                                                });
+
+            var client = new HttpClient();
+
+            var response = client.PostAsync("http://localhost:12345/post", new StringContent("hello")).Result;
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(body, Is.EqualTo("hello"));
+        }
+
+        [Test]
+        public void ResponseBodyCanBeAString()
+        {
+            _server.OnGet("/get").Respond((req, res) =>
+                                                {
+                                                    res.Body = "hello";
+                                                });
+
+            var client = new HttpClient();
+
+            var response = client.GetAsync("http://localhost:12345/get").Result;
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(response.Content.ReadAsStringAsync().Result, Is.EqualTo("hello"));
+        }
+
+        [Test]
+        public void ResponseBodyCanBeAStream()
+        {
+            _server.OnGet("/get").Respond((req, res) =>
+                                                {
+                                                    res.Body = new MemoryStream(System.Text.Encoding.UTF8.GetBytes("hello"));
+                                                });
+
+            var client = new HttpClient();
+
+            var response = client.GetAsync("http://localhost:12345/get").Result;
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(response.Content.ReadAsStringAsync().Result, Is.EqualTo("hello"));
+        }
+
+        [Test]
+        public void RequestBodyCanBeAStream()
+        {
+            string body = null;
+
+            _server.OnPost("/post").Respond((req, res) =>
+                                                {
+                                                    var streamBody = req.BodyAs<Stream>();
+                                                    using (var streamReader = new StreamReader(streamBody))
+                                                    {
+                                                        body = streamReader.ReadToEnd();
+                                                    }
+                                                });
+
+            var client = new HttpClient();
+
+            var response = client.PostAsync("http://localhost:12345/post", new StringContent("hello")).Result;
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(body, Is.EqualTo("hello"));
         }
 
         private static HttpWebResponse RequestWithBasicAuth(string requestUriString, string userName, string password)

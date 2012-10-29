@@ -1,18 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
 
 namespace SelfishHttp
 {
-    public class Server : IDisposable
+    public class Server : IDisposable, IServerConfiguration
     {
         private HttpListener _listener;
-        private List<IHttpHandler> _handlers = new List<IHttpHandler>();
+        private readonly List<IHttpHandler> _handlers = new List<IHttpHandler>();
+        public IBodyParser BodyParser { get; set; }
+        public IBodyWriter BodyWriter { get; set; }
 
         public Server(int port)
         {
+            BodyParser = BodyParsers.DefaultBodyParser();
+            BodyWriter = BodyWriters.DefaultBodyWriter();
             BaseUrl = String.Format("http://*:{0}/", port);
             Start();
         }
@@ -46,7 +51,7 @@ namespace SelfishHttp
 
         private IHttpHandler AddHttpHandler(string method, string path)
         {
-            var httpHandler = new MethodPathHttpHandler {Method = method, Path = path};
+            var httpHandler = new MethodPathHttpHandler(this) {Method = method, Path = path};
             _handlers.Add(httpHandler);
             return httpHandler;
         }

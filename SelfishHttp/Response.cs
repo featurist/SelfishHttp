@@ -7,10 +7,12 @@ namespace SelfishHttp
 {
     public class Response : IResponse
     {
+        private readonly IBodyWriter _bodyWriter;
         private readonly HttpListenerResponse _response;
 
-        public Response(HttpListenerResponse response)
+        public Response(IBodyWriter bodyWriter, HttpListenerResponse response)
         {
+            _bodyWriter = bodyWriter;
             _response = response;
         }
 
@@ -25,18 +27,9 @@ namespace SelfishHttp
             get { return _response.Headers; }
         }
 
-        public dynamic Body
+        public object Body
         {
-            set
-            {
-                if (value is string)
-                {
-                    using (var output = new StreamWriter(_response.OutputStream))
-                    {
-                        output.Write(value);
-                    }
-                }
-            }
+            set { _bodyWriter.WriteBody(value, _response.OutputStream); }
         }
     }
 }

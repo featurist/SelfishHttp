@@ -6,12 +6,14 @@ namespace SelfishHttp
 {
     public class MethodPathHttpHandler : IHttpHandler
     {
+        public IServerConfiguration ServerConfiguration { get; private set; }
         public string Method;
         public string Path;
         public IList<Action<HttpListenerContext, Action>> Handlers { get; set; }
 
-        public MethodPathHttpHandler()
+        public MethodPathHttpHandler(IServerConfiguration serverConfiguration)
         {
+            ServerConfiguration = serverConfiguration;
             AuthenticationScheme = AuthenticationSchemes.Anonymous;
             Handlers = new List<Action<HttpListenerContext, Action>>();
         }
