@@ -102,9 +102,13 @@ namespace SelfishHttp
                     {
                         handler.Handle(context);
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
                         res.StatusCode = 500;
+                        using (var output = new StreamWriter(res.OutputStream))
+                        {
+                            output.Write(ex);
+                        }
                         res.Close();
                     }
                 }

@@ -58,7 +58,7 @@ namespace SelfishHttp.Test
         [Test]
         public void ShouldAcceptPut()
         {
-            _server.OnPut("/putsomethinghere").RespondWith(body => body);
+            _server.OnPut("/putsomethinghere").Respond((req, res) => { res.Body = req.BodyAs<Stream>(); });
 
             var client = new HttpClient();
             var response = client.PutAsync("http://localhost:12345/putsomethinghere", new StringContent("something to put")).Result.Content.ReadAsStringAsync().Result;
@@ -68,7 +68,7 @@ namespace SelfishHttp.Test
         [Test]
         public void ShouldAcceptPost()
         {
-            _server.OnPost("/postsomethinghere").RespondWith(body => body);
+            _server.OnPost("/postsomethinghere").Respond((req, res) => { res.Body = req.BodyAs<Stream>(); });
 
             var client = new HttpClient();
             var response = client.PostAsync("http://localhost:12345/postsomethinghere", new StringContent("something to post")).Result.Content.ReadAsStringAsync().Result;
@@ -88,11 +88,12 @@ namespace SelfishHttp.Test
         [Test]
         public void Returns500WhenResponseHandlerThrowsException()
         {
-            _server.OnGet("/error").RespondWith(body => { throw new Exception("bad stuff!"); });
+            _server.OnGet("/error").Respond((req, res) => { throw new Exception("bad stuff!"); });
 
             var client = new HttpClient();
             var response = client.GetAsync("http://localhost:12345/error").Result;
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.InternalServerError));
+            Assert.That(response.Content.ReadAsStringAsync().Result, Contains.Substring("bad stuff!"));
         }
 
         [Test]
