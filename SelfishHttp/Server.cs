@@ -51,7 +51,7 @@ namespace SelfishHttp
 
         private IHttpHandler AddHttpHandler(string method, string path)
         {
-            var httpHandler = new MethodPathHttpHandler(this) {Method = method, Path = path};
+            var httpHandler = new MethodPathHttpHandler(method, path, this);
             _handlers.Add(httpHandler);
             return httpHandler;
         }
