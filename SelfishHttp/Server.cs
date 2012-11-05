@@ -13,11 +13,13 @@ namespace SelfishHttp
         private readonly List<IHttpHandler> _handlers = new List<IHttpHandler>();
         public IBodyParser BodyParser { get; set; }
         public IBodyWriter BodyWriter { get; set; }
+        public IParamsParser ParamsParser { get; set; }
 
         public Server(int port)
         {
             BodyParser = BodyParsers.DefaultBodyParser();
             BodyWriter = BodyWriters.DefaultBodyWriter();
+            ParamsParser = new UrlParamsParser();
             BaseUrl = String.Format("http://*:{0}/", port);
             Start();
         }

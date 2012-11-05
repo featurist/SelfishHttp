@@ -1,9 +1,14 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SelfishHttp", "SelfishHttp\SelfishHttp.csproj", "{CBC4B18A-A94C-4512-96A7-3465BD5BA20E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SelfishHttp.Test", "SelfishHttp.Test\SelfishHttp.Test.csproj", "{446C93C9-8FAE-4FD5-8A00-56118DF1A82C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5DC95960-9EB2-4416-B30F-F0ECCF9AEBE2}"
+	ProjectSection(SolutionItems) = preProject
+		SelfishHttp.nuspec = SelfishHttp.nuspec
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

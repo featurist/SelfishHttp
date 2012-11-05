@@ -3,29 +3,13 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Threading;
 using NUnit.Framework;
 
 namespace SelfishHttp.Test
 {
     [TestFixture]
-    public class SelfishHttpTest
+    public class SelfishHttpTest : SelfishHttpFeature
     {
-        private Server _server;
-
-        [SetUp]
-        public void SetUp()
-        {
-            _server = new Server(12345);
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            _server.Stop();
-        }
-
         [Test]
         public void ShouldReturnCorrectResource()
         {

@@ -4,5 +4,6 @@ namespace SelfishHttp
     {
         IBodyParser BodyParser { get; set; }
         IBodyWriter BodyWriter { get; set; }
+        IParamsParser ParamsParser { get; set; }
     }
 }

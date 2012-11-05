@@ -45,7 +45,7 @@ namespace SelfishHttp
 
         public bool Matches(HttpListenerRequest request)
         {
-            return request.HttpMethod == Method && request.RawUrl == Path;
+            return request.HttpMethod == Method && request.Url.AbsolutePath == Path;
         }
     }
 }

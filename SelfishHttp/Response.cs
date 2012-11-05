@@ -29,7 +29,7 @@ namespace SelfishHttp
 
         public object Body
         {
-            set { _bodyWriter.WriteBody(value, _response.OutputStream); }
+            set { _bodyWriter.WriteBody(value ?? "", _response.OutputStream); }
         }
     }
 }

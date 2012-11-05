@@ -49,6 +49,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ParametersFeature.cs" />
+    <Compile Include="SelfishHttpFeature.cs" />
     <Compile Include="SelfishHttpTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
