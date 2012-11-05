@@ -51,6 +51,11 @@ namespace SelfishHttp
             return AddHttpHandler("DELETE", path);
         }
 
+        public IHttpHandler OnOptions(string path)
+        {
+            return AddHttpHandler("OPTIONS", path);
+        }
+
         private IHttpHandler AddHttpHandler(string method, string path)
         {
             var httpHandler = new MethodPathHttpHandler(method, path, this);

@@ -227,6 +227,22 @@ namespace SelfishHttp.Test
             Assert.That(body, Is.EqualTo("hello"));
         }
 
+        [Test]
+        public void CanRespondToOptionsRequest()
+        {
+            _server.OnOptions("/options").Respond((req, res) =>
+                                                      {
+                                                          res.Body = "here are the options: ...";
+                                                      });
+
+            var client = new HttpClient();
+
+            var request = new HttpRequestMessage(HttpMethod.Options, "http://localhost:12345/options");
+            var response = client.SendAsync(request).Result;
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(response.Content.ReadAsStringAsync().Result, Is.EqualTo("here are the options: ..."));
+        }
+
         private static HttpWebResponse RequestWithBasicAuth(string requestUriString, string userName, string password)
         {
             var request = (HttpWebRequest) WebRequest.Create(requestUriString);
