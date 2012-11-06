@@ -5,9 +5,9 @@ namespace SelfishHttp
 {
     public static class StringHandlerExtensions
     {
-        public static IHttpHandler RespondWith(this IHttpHandler handler, string respondWith)
+        public static T RespondWith<T>(this T handler, string respondWith) where T : IHttpHandler
         {
-            handler.Handlers.Add((context, next) =>
+            handler.AddHandler((context, next) =>
                                   {
                                       using (var writer = new StreamWriter(context.Response.OutputStream))
                                       {
@@ -18,9 +18,9 @@ namespace SelfishHttp
             return handler;
         }
 
-        public static IHttpHandler RespondWith(this IHttpHandler handler, Func<string, string> responseFromRequest)
+        public static T RespondWith<T>(this T handler, Func<string, string> responseFromRequest) where T : IHttpHandler
         {
-            handler.Handlers.Add((context, next) =>
+            handler.AddHandler((context, next) =>
                                   {
                                       string requestBody;
 

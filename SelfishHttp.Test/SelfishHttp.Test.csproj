@@ -49,6 +49,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BasicAuthenticationFeature.cs" />
+    <Compile Include="CrossOriginRequestsFeature.cs" />
     <Compile Include="ParametersFeature.cs" />
     <Compile Include="SelfishHttpFeature.cs" />
     <Compile Include="SelfishHttpTest.cs" />

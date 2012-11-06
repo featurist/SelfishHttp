@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 using NUnit.Framework;
 
 namespace SelfishHttp.Test
@@ -126,40 +127,6 @@ namespace SelfishHttp.Test
         }
 
         [Test]
-        public void AllowsAuthencatedRequestsToProtectedResourcesWithCorrectCredentials()
-        {
-            _server.OnGet("/private").ProtectedWithBasicAuth("username", "password").RespondWith("this is private!");
-
-            var response = RequestWithBasicAuth("http://localhost:12345/private", "username", "password");
-
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-            using (var reader = new StreamReader(response.GetResponseStream()))
-            {
-                Assert.That(reader.ReadToEnd(), Is.EqualTo("this is private!"));
-            }
-        }
-
-        [Test]
-        public void DisallowsAuthencatedRequestsToProtectedResourcesWithIncorrectCredentials()
-        {
-            _server.OnGet("/private").ProtectedWithBasicAuth("username", "password").RespondWith("this is private!");
-
-            try
-            {
-                RequestWithBasicAuth("http://localhost:12345/private", "username", "badpassword");
-            } catch (WebException we)
-            {
-                Assert.That(we.Response, Is.Not.Null);
-                var response = (HttpWebResponse) we.Response;
-                Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
-                using (var reader = new StreamReader(response.GetResponseStream()))
-                {
-                    Assert.That(reader.ReadToEnd(), Is.EqualTo(""));
-                }
-            }
-        }
-
-        [Test]
         public void RequestBodyCanBeAString()
         {
             string body = null;
@@ -243,16 +210,38 @@ namespace SelfishHttp.Test
             Assert.That(response.Content.ReadAsStringAsync().Result, Is.EqualTo("here are the options: ..."));
         }
 
-        private static HttpWebResponse RequestWithBasicAuth(string requestUriString, string userName, string password)
+        [Test]
+        public void ResponsesCanBeDecorated()
         {
-            var request = (HttpWebRequest) WebRequest.Create(requestUriString);
-            request.Proxy = new WebProxy("http://localhost:8888/", false);
-            var credentialCache = new CredentialCache();
-            credentialCache.Add(new Uri(new Uri(requestUriString).GetLeftPart(UriPartial.Authority)), "Basic", new NetworkCredential(userName, password));
-            request.Credentials = credentialCache;
-            request.PreAuthenticate = true;
-            var response = (HttpWebResponse) request.GetResponse();
-            return response;
+            _server.OnGet("/get").Respond((req, res, next) =>
+            {
+                res.Headers["x-custom"] = "thingo";
+                next();
+            }).Respond((req, res) =>
+            {
+                res.Body = "response";
+            });
+
+            var client = new HttpClient();
+
+            var response = client.GetAsync(BaseUrl + "get").Result;
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(response.Headers.GetValues("x-custom").Single(), Is.EqualTo("thingo"));
+            Assert.That(response.Content.ReadAsStringAsync().Result, Is.EqualTo("response"));
+        }
+
+        [Test]
+        public void AllServerResponsesCanBeDecorated()
+        {
+            _server.OnRequest().Respond((req, res) => { res.Headers["x-custom"] = "thingo"; });
+            _server.OnGet("/get").RespondWith("hi");
+
+            var client = new HttpClient();
+
+            var response = client.GetAsync(BaseUrl + "get").Result;
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(response.Headers.GetValues("x-custom").Single(), Is.EqualTo("thingo"));
+            Assert.That(response.Content.ReadAsStringAsync().Result, Is.EqualTo("hi"));
         }
     }
 }

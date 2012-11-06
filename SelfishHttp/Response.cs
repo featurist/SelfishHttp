@@ -10,9 +10,9 @@ namespace SelfishHttp
         private readonly IBodyWriter _bodyWriter;
         private readonly HttpListenerResponse _response;
 
-        public Response(IBodyWriter bodyWriter, HttpListenerResponse response)
+        public Response(IServerConfiguration config, HttpListenerResponse response)
         {
-            _bodyWriter = bodyWriter;
+            _bodyWriter = config.BodyWriter;
             _response = response;
         }
 

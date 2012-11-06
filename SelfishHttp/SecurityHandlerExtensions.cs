@@ -5,15 +5,15 @@ namespace SelfishHttp
 {
     public static class SecurityHandlerExtensions
     {
-        public static IHttpHandler ProtectedWithBasicAuth(this IHttpHandler handler, string username, string password)
+        public static T ProtectedWithBasicAuth<T>(this T handler, string username, string password) where T : IHttpHandler
         {
             return ProtectedWithBasicAuth(handler, (u, pw) => u == username && pw == password);
         }
 
-        public static IHttpHandler ProtectedWithBasicAuth(this IHttpHandler handler, Func<string, string, bool> areCredentialsCorrect)
+        public static T ProtectedWithBasicAuth<T>(this T handler, Func<string, string, bool> areCredentialsCorrect) where T : IHttpHandler
         {
             handler.AuthenticationScheme = AuthenticationSchemes.Basic;
-            handler.Handlers.Add((context, next) =>
+            handler.AddHandler((context, next) =>
                                      {
                                          if (context.Request.IsAuthenticated)
                                          {

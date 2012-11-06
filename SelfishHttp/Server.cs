@@ -10,7 +10,8 @@ namespace SelfishHttp
     public class Server : IDisposable, IServerConfiguration
     {
         private HttpListener _listener;
-        private readonly List<IHttpHandler> _handlers = new List<IHttpHandler>();
+        private readonly HttpHandler _anyRequestHandler;
+        private readonly List<IHttpResourceHandler> _resourceHandlers = new List<IHttpResourceHandler>();
         public IBodyParser BodyParser { get; set; }
         public IBodyWriter BodyWriter { get; set; }
         public IParamsParser ParamsParser { get; set; }
@@ -20,46 +21,52 @@ namespace SelfishHttp
             BodyParser = BodyParsers.DefaultBodyParser();
             BodyWriter = BodyWriters.DefaultBodyWriter();
             ParamsParser = new UrlParamsParser();
+            _anyRequestHandler = new HttpHandler(this);
             BaseUrl = String.Format("http://*:{0}/", port);
             Start();
         }
 
         public string BaseUrl { get; private set; }
 
-        public IHttpHandler OnGet(string path)
+        public IHttpResourceHandler OnGet(string path)
         {
             return AddHttpHandler("GET", path);
         }
 
-        public IHttpHandler OnHead(string path)
+        public IHttpResourceHandler OnHead(string path)
         {
             return AddHttpHandler("HEAD", path);
         }
 
-        public IHttpHandler OnPut(string path)
+        public IHttpResourceHandler OnPut(string path)
         {
             return AddHttpHandler("PUT", path);
         }
 
-        public IHttpHandler OnPost(string path)
+        public IHttpResourceHandler OnPost(string path)
         {
             return AddHttpHandler("POST", path);
         }
 
-        public IHttpHandler OnDelete(string path)
+        public IHttpResourceHandler OnDelete(string path)
         {
             return AddHttpHandler("DELETE", path);
         }
 
-        public IHttpHandler OnOptions(string path)
+        public IHttpResourceHandler OnOptions(string path)
         {
             return AddHttpHandler("OPTIONS", path);
         }
 
-        private IHttpHandler AddHttpHandler(string method, string path)
+        public IHttpHandler OnRequest()
         {
-            var httpHandler = new MethodPathHttpHandler(method, path, this);
-            _handlers.Add(httpHandler);
+            return _anyRequestHandler;
+        }
+
+        private IHttpResourceHandler AddHttpHandler(string method, string path)
+        {
+            var httpHandler = new HttpResourceHandler(method, path, this);
+            _resourceHandlers.Add(httpHandler);
             return httpHandler;
         }
 
@@ -74,17 +81,22 @@ namespace SelfishHttp
 
         private AuthenticationSchemes AuthenticationSchemeSelectorDelegate(HttpListenerRequest httpRequest)
         {
-            var handler = _handlers.FirstOrDefault(h => h.Matches(httpRequest));
-            if (handler != null)
+            if (_anyRequestHandler.AuthenticationScheme.HasValue)
             {
-                return handler.AuthenticationSchemeFor(httpRequest);
+                return _anyRequestHandler.AuthenticationScheme.Value;
+            }
+
+            var handler = _resourceHandlers.FirstOrDefault(h => h.Matches(httpRequest));
+            if (handler != null && handler.AuthenticationScheme.HasValue)
+            {
+                return handler.AuthenticationScheme.Value;
             }
             return AuthenticationSchemes.Anonymous;
         }
 
         private void HandleNextRequest()
         {
-            _listener.BeginGetContext(OnRequest, null);
+            _listener.BeginGetContext(HandleRequest, null);
         }
 
         public void Stop()
@@ -92,7 +104,7 @@ namespace SelfishHttp
             _listener.Stop();
         }
 
-        private void OnRequest(IAsyncResult ar)
+        private void HandleRequest(IAsyncResult ar)
         {
             if (_listener.IsListening)
             {
@@ -101,29 +113,34 @@ namespace SelfishHttp
                 HttpListenerRequest req = context.Request;
                 HttpListenerResponse res = context.Response;
 
-                var handler = _handlers.FirstOrDefault(h => h.Matches(req));
-
-                if (handler != null)
+                _anyRequestHandler.Handle(context, () =>
                 {
-                    try
+                    var handler = _resourceHandlers.FirstOrDefault(h => h.Matches(req));
+
+                    if (handler != null)
                     {
-                        handler.Handle(context);
-                    }
-                    catch (Exception ex)
-                    {
-                        res.StatusCode = 500;
-                        using (var output = new StreamWriter(res.OutputStream))
+                        try
                         {
-                            output.Write(ex);
+                            handler.Handle(context, res.Close);
                         }
+                        catch (Exception ex)
+                        {
+                            res.StatusCode = 500;
+                            using (var output = new StreamWriter(res.OutputStream))
+                            {
+                                output.Write(ex);
+                            }
+                            res.Close();
+                        }
+                    }
+                    else
+                    {
+                        res.StatusCode = 404;
                         res.Close();
                     }
-                }
-                else
-                {
-                    res.StatusCode = 404;
-                    res.Close();
-                }
+                });
+
+                res.Close();
             }
         }
 

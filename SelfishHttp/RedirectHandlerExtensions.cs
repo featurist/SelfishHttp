@@ -2,9 +2,9 @@ namespace SelfishHttp
 {
     public static class RedirectHandlerExtensions
     {
-        public static IHttpHandler RedirectTo(this IHttpHandler handler, string path)
+        public static T RedirectTo<T>(this T handler, string path) where T : IHttpHandler
         {
-            handler.Handlers.Add((context, next) => context.Response.Redirect(path));
+            handler.AddHandler((context, next) => context.Response.Redirect(path));
             return handler;
         }
     }
