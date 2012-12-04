@@ -53,6 +53,7 @@
     <Compile Include="IResponse.cs" />
     <Compile Include="IServerConfiguration.cs" />
     <Compile Include="HttpResourceHandler.cs" />
+    <Compile Include="ProxyHandlerExtensions.cs" />
     <Compile Include="RedirectHandlerExtensions.cs" />
     <Compile Include="Request.cs" />
     <Compile Include="RequestResponseHandlerExtensions.cs" />
