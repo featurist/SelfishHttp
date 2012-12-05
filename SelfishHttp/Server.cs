@@ -113,34 +113,36 @@ namespace SelfishHttp
                 HttpListenerRequest req = context.Request;
                 HttpListenerResponse res = context.Response;
 
-                _anyRequestHandler.Handle(context, () =>
-                {
-                    var handler = _resourceHandlers.FirstOrDefault(h => h.Matches(req));
+                Console.WriteLine("request: " + req.Url);
 
-                    if (handler != null)
+                try
+                {
+                    _anyRequestHandler.Handle(context, () =>
                     {
-                        try
+                        var handler = _resourceHandlers.FirstOrDefault(h => h.Matches(req));
+
+                        if (handler != null)
                         {
-                            handler.Handle(context, res.Close);
+                                handler.Handle(context, res.Close);
                         }
-                        catch (Exception ex)
+                        else
                         {
-                            res.StatusCode = 500;
-                            using (var output = new StreamWriter(res.OutputStream))
-                            {
-                                output.Write(ex);
-                            }
+                            res.StatusCode = 404;
                             res.Close();
                         }
-                    }
-                    else
-                    {
-                        res.StatusCode = 404;
-                        res.Close();
-                    }
-                });
+                    });
 
-                res.Close();
+                    res.Close();
+                }
+                catch (Exception ex)
+                {
+                    res.StatusCode = 500;
+                    using (var output = new StreamWriter(res.OutputStream))
+                    {
+                        output.Write(ex);
+                    }
+                    res.Close();
+                }
             }
         }
 

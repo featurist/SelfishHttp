@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Specialized;
+using System.Linq;
+using System.IO;
 using System.Net;
 
 namespace SelfishHttp
@@ -10,8 +12,11 @@ namespace SelfishHttp
         {
             handler.AddHandler((context, next) =>
                                    {
-                                       var request = (HttpWebRequest) WebRequest.Create(new Uri(new Uri(url), context.Request.Url.AbsolutePath));
+                                       var request = (HttpWebRequest) WebRequest.Create(new Uri(new Uri(url), context.Request.Url.PathAndQuery.TrimStart('/')));
                                        request.Method = context.Request.HttpMethod;
+
+                                       Console.WriteLine(request.RequestUri);
+
                                        CopyHeaders(context.Request.Headers, request);
 
                                        if (request.Method == "POST" || request.Method == "PUT")
@@ -19,14 +24,39 @@ namespace SelfishHttp
                                            context.Request.InputStream.CopyTo(request.GetRequestStream());
                                        }
 
-                                       var response = request.GetResponse();
+                                       var response = GetReponse(request);
+                                       context.Response.StatusCode = (int) response.StatusCode;
                                        foreach (var header in response.Headers.AllKeys)
                                        {
-                                           context.Response.AddHeader(header, response.Headers[header]);
+                                           // content-length breaks copying the body stream
+                                           if (header.ToLower() != "content-length")
+                                           {
+                                               context.Response.AddHeader(header, response.Headers[header]);
+                                           }
                                        }
+
                                        response.GetResponseStream().CopyTo(context.Response.OutputStream);
                                    });
             return handler;
+        }
+
+        private static HttpWebResponse GetReponse(HttpWebRequest request)
+        {
+            try
+            {
+                return (HttpWebResponse) request.GetResponse();
+            }
+            catch (WebException e)
+            {
+                if (e.Response != null)
+                {
+                    return (HttpWebResponse) e.Response;
+                }
+                else
+                {
+                    throw;
+                }
+            }
         }
 
         private static void CopyHeaders(NameValueCollection fromHeaders, HttpWebRequest request)
@@ -43,7 +73,9 @@ namespace SelfishHttp
                         if (value.ToLower() == "keep-alive")
                             request.KeepAlive = true;
                         else
+                        {
                             request.Connection = value;
+                        }
                         break;
                     case "content-length":
                         request.ContentLength = long.Parse(value);
@@ -57,7 +89,6 @@ namespace SelfishHttp
                     case "expect":
                         break;
                     case "host":
-                        request.Host = value;
                         break;
                     case "if-modified-since":
                         request.IfModifiedSince = DateTime.Parse(value);

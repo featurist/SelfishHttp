@@ -27,6 +27,19 @@ namespace SelfishHttp.Test
         }
 
         [Test]
+        public void ForwardsTheRequestButRewritesTheHostHeader()
+        {
+            _backendServer.OnGet("/stuff").Respond((req, res) => { res.Body = req.Headers["Host"]; });
+            _proxyServer.OnRequest().ForwardTo("http://thing.localtest.me:12346/");
+
+            var client = new HttpClient();
+            var response = client.GetAsync("http://localhost:12345/stuff").Result;
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            var body = response.Content.ReadAsStringAsync().Result;
+            Assert.That(body, Is.EqualTo("thing.localtest.me:12346"));
+        }
+
+        [Test]
         public void CanForwardHttpRequestToAnotherServer()
         {
             _backendServer.OnGet("/stuff").RespondWith("this is stuff!");
@@ -37,6 +50,31 @@ namespace SelfishHttp.Test
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
             var body = response.Content.ReadAsStringAsync().Result;
             Assert.That(body, Is.EqualTo("this is stuff!"));
+        }
+
+        [Test]
+        public void ForwardsRequestRelativeToForwardUrl()
+        {
+            _backendServer.OnGet("/thingo/stuff").RespondWith("this is stuff!");
+            _proxyServer.OnRequest().ForwardTo("http://localhost:12346/thingo/");
+
+            var client = new HttpClient();
+            var response = client.GetAsync("http://localhost:12345/stuff").Result;
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            var body = response.Content.ReadAsStringAsync().Result;
+            Assert.That(body, Is.EqualTo("this is stuff!"));
+        }
+
+        [Test]
+        public void ForwardsTheQueryString()
+        {
+            _backendServer.OnGet("/good").Respond((req, res) => res.Body = req.Params["foo"] + "," + req.Params["fruit"]);
+            _proxyServer.OnRequest().ForwardTo("http://localhost:12346/");
+
+            var client = new HttpClient();
+            var response = client.GetAsync("http://localhost:12345/good?foo=bar&fruit=banana").Result;
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(response.Content.ReadAsStringAsync().Result, Is.EqualTo("bar,banana"));
         }
 
         [Test]
@@ -64,6 +102,22 @@ namespace SelfishHttp.Test
             var response = client.SendAsync(request).Result;
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
             Assert.That(response.Headers.GetValues("X-Thing").ElementAt(0), Is.EqualTo("the thing"));
+        }
+
+        [Test]
+        public void ReturnsSameStatusCodeAsBackEnd()
+        {
+            _backendServer.OnGet("/stuff").Respond((req, res) =>
+                                                      {
+                                                          res.StatusCode = 400;
+                                                          res.Body = "this is the body";
+                                                      });
+            _proxyServer.OnRequest().ForwardTo("http://localhost:12346/");
+
+            var client = new HttpClient();
+            var response = client.GetAsync("http://localhost:12345/stuff").Result;
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+            Assert.That(response.Content.ReadAsStringAsync().Result, Is.EqualTo("this is the body"));
         }
     }
 }

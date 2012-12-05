@@ -243,5 +243,16 @@ namespace SelfishHttp.Test
             Assert.That(response.Headers.GetValues("x-custom").Single(), Is.EqualTo("thingo"));
             Assert.That(response.Content.ReadAsStringAsync().Result, Is.EqualTo("hi"));
         }
+
+        [Test]
+        public void Returns500IfOnRequestFails()
+        {
+            _server.OnRequest().Respond((req, res) => { throw new Exception("bad stuff!"); });
+
+            var client = new HttpClient();
+
+            var response = client.GetAsync(BaseUrl + "get").Result;
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.InternalServerError));
+        }
     }
 }
