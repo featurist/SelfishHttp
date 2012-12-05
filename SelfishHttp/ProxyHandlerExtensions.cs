@@ -15,8 +15,6 @@ namespace SelfishHttp
                                        var request = (HttpWebRequest) WebRequest.Create(new Uri(new Uri(url), context.Request.Url.PathAndQuery.TrimStart('/')));
                                        request.Method = context.Request.HttpMethod;
 
-                                       Console.WriteLine(request.RequestUri);
-
                                        CopyHeaders(context.Request.Headers, request);
 
                                        if (request.Method == "POST" || request.Method == "PUT")

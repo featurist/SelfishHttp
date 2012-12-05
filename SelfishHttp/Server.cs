@@ -113,8 +113,6 @@ namespace SelfishHttp
                 HttpListenerRequest req = context.Request;
                 HttpListenerResponse res = context.Response;
 
-                Console.WriteLine("request: " + req.Url);
-
                 try
                 {
                     _anyRequestHandler.Handle(context, () =>
