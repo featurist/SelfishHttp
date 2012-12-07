@@ -22,6 +22,18 @@ namespace SelfishHttp.Test
         }
 
         [Test]
+        public void ShouldHonourNoCache()
+        {
+            _server.OnGet("/stuff").DisallowCaching().RespondWith("yes, this is stuff");
+
+            var client = new HttpClient();
+            var response = client.GetAsync("http://localhost:12345/stuff").Result;
+            var responseHeaders = response.Headers;
+            Assert.That(responseHeaders.CacheControl.NoCache, Is.True);
+            Assert.That(response.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, this is stuff"));
+        }
+
+        [Test]
         public void ShouldRedirectToAnotherUrl()
         {
             _server.OnGet("/stuff").RedirectTo("/otherstuff");

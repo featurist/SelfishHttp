@@ -58,6 +58,7 @@
     <Compile Include="Request.cs" />
     <Compile Include="RequestResponseHandlerExtensions.cs" />
     <Compile Include="Response.cs" />
+    <Compile Include="ResponseHeadersExtensions.cs" />
     <Compile Include="SecurityHandlerExtensions.cs" />
     <Compile Include="Server.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

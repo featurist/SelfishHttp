@@ -41,5 +41,6 @@ It supports:
 * An expressive builder interface for building up handlers.
 * Extensible body parsers and writers for different content types.
 * Able to proxy requests to other servers.
+* Option to disable client caching in response headers
 
 See the [tests](https://github.com/featurist/SelfishHttp/tree/master/SelfishHttp.Test) for examples.
