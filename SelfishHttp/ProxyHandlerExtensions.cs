@@ -23,7 +23,6 @@ namespace SelfishHttp
                                        }
 
                                        var response = GetReponse(request);
-                                       context.Response.StatusCode = (int) response.StatusCode;
                                        foreach (var header in response.Headers.AllKeys)
                                        {
                                            // content-length breaks copying the body stream
@@ -32,6 +31,10 @@ namespace SelfishHttp
                                                context.Response.AddHeader(header, response.Headers[header]);
                                            }
                                        }
+
+                                       next();
+
+                                       context.Response.StatusCode = (int) response.StatusCode;
 
                                        response.GetResponseStream().CopyTo(context.Response.OutputStream);
                                    });

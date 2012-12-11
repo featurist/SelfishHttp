@@ -8,7 +8,9 @@ namespace SelfishHttp
         public static T RespondWith<T>(this T handler, string respondWith) where T : IHttpHandler
         {
             handler.AddHandler((context, next) =>
-                                  {
+                                   {
+                                      next();
+
                                       using (var writer = new StreamWriter(context.Response.OutputStream))
                                       {
                                           writer.Write(respondWith);
@@ -30,6 +32,8 @@ namespace SelfishHttp
                                       }
 
                                       var responseBody = responseFromRequest(requestBody);
+
+                                      next();
 
                                       using (var writer = new StreamWriter(context.Response.OutputStream))
                                       {

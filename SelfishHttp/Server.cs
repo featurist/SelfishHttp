@@ -121,15 +121,15 @@ namespace SelfishHttp
 
                         if (handler != null)
                         {
-                                handler.Handle(context, res.Close);
+                                handler.Handle(context, () => { });
                         }
                         else
                         {
                             res.StatusCode = 404;
-                            res.Close();
                         }
                     });
 
+                    Console.WriteLine("closing");
                     res.Close();
                 }
                 catch (Exception ex)
