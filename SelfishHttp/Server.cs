@@ -106,41 +106,48 @@ namespace SelfishHttp
 
         private void HandleRequest(IAsyncResult ar)
         {
-            if (_listener.IsListening)
+            try
             {
-                HandleNextRequest();
                 var context = _listener.EndGetContext(ar);
-                HttpListenerRequest req = context.Request;
-                HttpListenerResponse res = context.Response;
-
-                try
+                if (_listener.IsListening)
                 {
-                    _anyRequestHandler.Handle(context, () =>
-                    {
-                        var handler = _resourceHandlers.FirstOrDefault(h => h.Matches(req));
+                    HandleNextRequest();
+                    HttpListenerRequest req = context.Request;
+                    HttpListenerResponse res = context.Response;
 
-                        if (handler != null)
-                        {
-                                handler.Handle(context, () => { });
-                        }
-                        else
-                        {
-                            res.StatusCode = 404;
-                        }
-                    });
-
-                    Console.WriteLine("closing");
-                    res.Close();
-                }
-                catch (Exception ex)
-                {
-                    res.StatusCode = 500;
-                    using (var output = new StreamWriter(res.OutputStream))
+                    try
                     {
-                        output.Write(ex);
+                        _anyRequestHandler.Handle(context, () =>
+                                                               {
+                                                                   var handler = _resourceHandlers.FirstOrDefault(h => h.Matches(req));
+
+                                                                   if (handler != null)
+                                                                   {
+                                                                       handler.Handle(context, () => { });
+                                                                   }
+                                                                   else
+                                                                   {
+                                                                       res.StatusCode = 404;
+                                                                   }
+                                                               });
+
+                        res.Close();
                     }
-                    res.Close();
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex);
+                        res.StatusCode = 500;
+                        using (var output = new StreamWriter(res.OutputStream))
+                        {
+                            output.Write(ex);
+                        }
+                        res.Close();
+                    }
                 }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
             }
         }
 
