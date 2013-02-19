@@ -33,7 +33,7 @@ SelfishHttp is an easy to use HTTP server that you can configure with regular C#
 
 It supports:
 
-* All the verbs: GET, PUT, POST, DELETE, OPTIONS, HEAD. Any others?
+* All the verbs: GET, PUT, POST, DELETE, OPTIONS, HEAD, PATCH. Any others?
 * Basic Authentication.
 * [CORS](http://en.wikipedia.org/wiki/Cross-origin_resource_sharing).
 * Stream bodies.

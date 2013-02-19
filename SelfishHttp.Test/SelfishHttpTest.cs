@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Threading;
 using NUnit.Framework;
 
 namespace SelfishHttp.Test
@@ -72,6 +71,21 @@ namespace SelfishHttp.Test
             var client = new HttpClient();
             var response = client.PutAsync("http://localhost:12345/putsomethinghere", new StringContent("something to put")).Result.Content.ReadAsStringAsync().Result;
             Assert.That(response, Is.EqualTo("something to put"));
+        }
+
+        [Test]
+        public void ShouldAcceptPatch()
+        {
+            _server.OnPatch("/sendmeapatch").Respond((req, res) => { res.StatusCode = 204; });
+
+            var client = new HttpClient();
+            var message = new HttpRequestMessage(new HttpMethod("PATCH"), "http://localhost:12345/sendmeapatch")
+                {
+                    Content = new StringContent("my patch")
+                };
+            var response = client.SendAsync(message).Result;
+          
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NoContent));
         }
 
         [Test]

@@ -43,6 +43,11 @@ namespace SelfishHttp
             return AddHttpHandler("PUT", path);
         }
 
+        public IHttpResourceHandler OnPatch(string path)
+        {
+            return AddHttpHandler("PATCH", path);
+        }
+
         public IHttpResourceHandler OnPost(string path)
         {
             return AddHttpHandler("POST", path);
