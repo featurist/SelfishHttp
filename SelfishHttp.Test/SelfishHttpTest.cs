@@ -75,6 +75,21 @@ namespace SelfishHttp.Test
         }
 
         [Test]
+        public void ShouldAcceptPatch()
+        {
+            _server.OnPatch("/sendmeapatch").Respond((req, res) => { res.StatusCode = 204; });
+
+            var client = new HttpClient();
+            var message = new HttpRequestMessage(new HttpMethod("PATCH"), "http://localhost:12345/sendmeapatch")
+                {
+                    Content = new StringContent("my patch")
+                };
+            var response = client.SendAsync(message).Result;
+          
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NoContent));
+        }
+
+        [Test]
         public void ShouldAcceptPost()
         {
             _server.OnPost("/postsomethinghere").Respond((req, res) => { res.Body = req.BodyAs<Stream>(); });
