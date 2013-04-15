@@ -3,7 +3,7 @@ using NUnit.Framework;
 namespace SelfishHttp.Test
 {
     [TestFixture]
-    public class SelfishHttpFeature
+    public abstract class SelfishHttpFeature
     {
         protected Server _server;
         protected string BaseUrl;
