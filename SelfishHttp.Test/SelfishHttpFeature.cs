@@ -1,19 +1,23 @@
+using System;
 using NUnit.Framework;
 
 namespace SelfishHttp.Test
 {
     [TestFixture]
-    public class SelfishHttpFeature
+    public abstract class SelfishHttpFeature
     {
         protected Server _server;
-        protected string BaseUrl;
 
         [SetUp]
         public void SetUp()
         {
             int port = 12345;
             _server = new Server(port);
-            BaseUrl = string.Format("http://localhost:{0}/", port);
+        }
+
+        public string Url(string path)
+        {
+            return new Uri(new Uri(_server.BaseUri), path).ToString();
         }
 
         [TearDown]

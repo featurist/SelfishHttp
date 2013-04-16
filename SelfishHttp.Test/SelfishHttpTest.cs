@@ -16,7 +16,7 @@ namespace SelfishHttp.Test
             _server.OnGet("/stuff").RespondWith("yes, this is stuff");
 
             var client = new HttpClient();
-            var response = client.GetAsync("http://localhost:12345/stuff").Result.Content.ReadAsStringAsync().Result;
+            var response = client.GetAsync(Url("/stuff")).Result.Content.ReadAsStringAsync().Result;
             Assert.That(response, Is.EqualTo("yes, this is stuff"));
         }
 
@@ -26,7 +26,7 @@ namespace SelfishHttp.Test
             _server.OnGet("/stuff").NoCache().RespondWith("yes, this is stuff");
 
             var client = new HttpClient();
-            var response = client.GetAsync("http://localhost:12345/stuff").Result;
+            var response = client.GetAsync(Url("/stuff")).Result;
             var responseHeaders = response.Headers;
             Assert.That(responseHeaders.CacheControl.NoCache, Is.True);
             Assert.That(response.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, this is stuff"));
@@ -38,7 +38,7 @@ namespace SelfishHttp.Test
             _server.OnGet("/stuff").RespondWith("yes, this is stuff").NoCache();
 
             var client = new HttpClient();
-            var response = client.GetAsync("http://localhost:12345/stuff").Result;
+            var response = client.GetAsync(Url("/stuff")).Result;
             var responseHeaders = response.Headers;
             Assert.That(responseHeaders.CacheControl.NoCache, Is.True);
             Assert.That(response.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, this is stuff"));
@@ -51,7 +51,7 @@ namespace SelfishHttp.Test
             _server.OnGet("/otherstuff").RespondWith("yes, this is other stuff");
 
             var client = new HttpClient();
-            var response = client.GetAsync("http://localhost:12345/stuff").Result.Content.ReadAsStringAsync().Result;
+            var response = client.GetAsync(Url("/stuff")).Result.Content.ReadAsStringAsync().Result;
             Assert.That(response, Is.EqualTo("yes, this is other stuff"));
         }
 
@@ -59,7 +59,7 @@ namespace SelfishHttp.Test
         public void ShouldResultIn404WhenUrlNotFound()
         {
             var client = new HttpClient();
-            var statusCode = client.GetAsync("http://localhost:12345/stuff").Result.StatusCode;
+            var statusCode = client.GetAsync(Url("/stuff")).Result.StatusCode;
             Assert.That(statusCode, Is.EqualTo(HttpStatusCode.NotFound));
         }
 
@@ -69,7 +69,7 @@ namespace SelfishHttp.Test
             _server.OnPut("/putsomethinghere").Respond((req, res) => { res.Body = req.BodyAs<Stream>(); });
 
             var client = new HttpClient();
-            var response = client.PutAsync("http://localhost:12345/putsomethinghere", new StringContent("something to put")).Result.Content.ReadAsStringAsync().Result;
+            var response = client.PutAsync(Url("/putsomethinghere"), new StringContent("something to put")).Result.Content.ReadAsStringAsync().Result;
             Assert.That(response, Is.EqualTo("something to put"));
         }
 
@@ -79,7 +79,7 @@ namespace SelfishHttp.Test
             _server.OnPatch("/sendmeapatch").Respond((req, res) => { res.StatusCode = 204; });
 
             var client = new HttpClient();
-            var message = new HttpRequestMessage(new HttpMethod("PATCH"), "http://localhost:12345/sendmeapatch")
+            var message = new HttpRequestMessage(new HttpMethod("PATCH"), Url("/sendmeapatch"))
                 {
                     Content = new StringContent("my patch")
                 };
@@ -94,7 +94,7 @@ namespace SelfishHttp.Test
             _server.OnPost("/postsomethinghere").Respond((req, res) => { res.Body = req.BodyAs<Stream>(); });
 
             var client = new HttpClient();
-            var response = client.PostAsync("http://localhost:12345/postsomethinghere", new StringContent("something to post")).Result.Content.ReadAsStringAsync().Result;
+            var response = client.PostAsync(Url("/postsomethinghere"), new StringContent("something to post")).Result.Content.ReadAsStringAsync().Result;
             Assert.That(response, Is.EqualTo("something to post"));
         }
 
@@ -104,7 +104,7 @@ namespace SelfishHttp.Test
             _server.OnDelete("/deletethis").RespondWith("deleted it");
 
             var client = new HttpClient();
-            var response = client.DeleteAsync("http://localhost:12345/deletethis").Result.Content.ReadAsStringAsync().Result;
+            var response = client.DeleteAsync(Url("/deletethis")).Result.Content.ReadAsStringAsync().Result;
             Assert.That(response, Is.EqualTo("deleted it"));
         }
 
@@ -114,7 +114,7 @@ namespace SelfishHttp.Test
             _server.OnGet("/error").Respond((req, res) => { throw new Exception("bad stuff!"); });
 
             var client = new HttpClient();
-            var response = client.GetAsync("http://localhost:12345/error").Result;
+            var response = client.GetAsync(Url("/error")).Result;
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.InternalServerError));
             Assert.That(response.Content.ReadAsStringAsync().Result, Contains.Substring("bad stuff!"));
         }
@@ -129,7 +129,7 @@ namespace SelfishHttp.Test
 
             var client = new HttpClient();
 
-            var message = new HttpRequestMessage(HttpMethod.Get, "http://localhost:12345/arequest");
+            var message = new HttpRequestMessage(HttpMethod.Get, Url("/arequest"));
             message.Headers.Add("X-Custom", "hi!");
             var response = client.SendAsync(message).Result;
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
@@ -146,7 +146,7 @@ namespace SelfishHttp.Test
 
             var client = new HttpClient();
 
-            var response = client.GetAsync("http://localhost:12345/arequest").Result;
+            var response = client.GetAsync(Url("/arequest")).Result;
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
             Assert.That(response.Headers.GetValues("X-Custom").Single(), Is.EqualTo("hello there!"));
         }
@@ -158,7 +158,7 @@ namespace SelfishHttp.Test
 
             var client = new HttpClient();
 
-            var message = new HttpRequestMessage(HttpMethod.Head, "http://localhost:12345/head");
+            var message = new HttpRequestMessage(HttpMethod.Head, Url("/head"));
             var response = client.SendAsync(message).Result;
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
             Assert.That(response.Headers.GetValues("X-Head-Received").Single(), Is.EqualTo("true"));
@@ -176,7 +176,7 @@ namespace SelfishHttp.Test
 
             var client = new HttpClient();
 
-            var response = client.PostAsync("http://localhost:12345/post", new StringContent("hello")).Result;
+            var response = client.PostAsync(Url("/post"), new StringContent("hello")).Result;
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
             Assert.That(body, Is.EqualTo("hello"));
         }
@@ -191,7 +191,7 @@ namespace SelfishHttp.Test
 
             var client = new HttpClient();
 
-            var response = client.GetAsync("http://localhost:12345/get").Result;
+            var response = client.GetAsync(Url("/get")).Result;
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
             Assert.That(response.Content.ReadAsStringAsync().Result, Is.EqualTo("hello"));
         }
@@ -206,7 +206,7 @@ namespace SelfishHttp.Test
 
             var client = new HttpClient();
 
-            var response = client.GetAsync("http://localhost:12345/get").Result;
+            var response = client.GetAsync(Url("/get")).Result;
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
             Assert.That(response.Content.ReadAsStringAsync().Result, Is.EqualTo("hello"));
         }
@@ -227,7 +227,7 @@ namespace SelfishHttp.Test
 
             var client = new HttpClient();
 
-            var response = client.PostAsync("http://localhost:12345/post", new StringContent("hello")).Result;
+            var response = client.PostAsync(Url("/post"), new StringContent("hello")).Result;
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
             Assert.That(body, Is.EqualTo("hello"));
         }
@@ -262,7 +262,7 @@ namespace SelfishHttp.Test
 
             var client = new HttpClient();
 
-            var response = client.GetAsync(BaseUrl + "get").Result;
+            var response = client.GetAsync(Url("/get")).Result;
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
             Assert.That(response.Headers.GetValues("x-custom").Single(), Is.EqualTo("thingo"));
             Assert.That(response.Content.ReadAsStringAsync().Result, Is.EqualTo("response"));
@@ -276,7 +276,7 @@ namespace SelfishHttp.Test
 
             var client = new HttpClient();
 
-            var response = client.GetAsync(BaseUrl + "get").Result;
+            var response = client.GetAsync(Url("/get")).Result;
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
             Assert.That(response.Headers.GetValues("x-custom").Single(), Is.EqualTo("thingo"));
             Assert.That(response.Content.ReadAsStringAsync().Result, Is.EqualTo("hi"));
@@ -289,7 +289,7 @@ namespace SelfishHttp.Test
 
             var client = new HttpClient();
 
-            var response = client.GetAsync(BaseUrl + "get").Result;
+            var response = client.GetAsync(Url("/get")).Result;
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.InternalServerError));
         }
     }

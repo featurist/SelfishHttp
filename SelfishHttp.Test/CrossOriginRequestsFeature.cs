@@ -16,7 +16,7 @@ namespace SelfishHttp.Test
 
             var client = new HttpClient();
 
-            string url = BaseUrl + "cross-origin";
+            string url = Url("/cross-origin");
             var response = client.GetAsync(url).Result;
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
             Assert.That(response.Headers.GetValues("Access-Control-Allow-Origin").Single(), Is.EqualTo("*"));
