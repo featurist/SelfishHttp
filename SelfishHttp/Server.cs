@@ -162,10 +162,28 @@ namespace SelfishHttp
                     }
                 }
             }
+            catch (HttpListenerException e)
+            {
+                if (!IsOperationAbortedOnStoppingServer(e))
+                {
+                    throw;
+                }
+            }
             catch (Exception e)
             {
                 Console.WriteLine(e);
             }
+        }
+
+        /// <summary>
+        /// Return true if the exception is: The I/O operation has been aborted because of either a thread exit or an application request.
+        /// Happens when we stop the server and the listening is cancelled.
+        /// </summary>
+        /// <param name="e"></param>
+        /// <returns></returns>
+        private static bool IsOperationAbortedOnStoppingServer(HttpListenerException e)
+        {
+            return e.NativeErrorCode == 0x000003E3;
         }
 
         public void Dispose()
