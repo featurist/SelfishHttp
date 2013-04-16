@@ -13,7 +13,7 @@ namespace SelfishHttp.Test
         {
             _server.OnGet("/private").ProtectedWithBasicAuth("username", "password").RespondWith("this is private!");
 
-            var response = RequestWithBasicAuth("http://localhost:12345/private", "username", "password");
+            var response = RequestWithBasicAuth(Url("/private"), "username", "password");
 
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
             using (var reader = new StreamReader(response.GetResponseStream()))
@@ -27,7 +27,7 @@ namespace SelfishHttp.Test
         {
             _server.OnGet("/private").ProtectedWithBasicAuth("username", "password").RespondWith("this is private!");
 
-            CannotAccessWithInvalidCredentials("http://localhost:12345/private");
+            CannotAccessWithInvalidCredentials(Url("/private"));
         }
 
         private static void CannotAccessWithInvalidCredentials(string url)
@@ -55,8 +55,8 @@ namespace SelfishHttp.Test
             _server.OnGet("/a").RespondWith("private a");
             _server.OnGet("/a").RespondWith("private b");
 
-            CannotAccessWithInvalidCredentials("http://localhost:12345/a");
-            CannotAccessWithInvalidCredentials("http://localhost:12345/b");
+            CannotAccessWithInvalidCredentials(Url("/a"));
+            CannotAccessWithInvalidCredentials(Url("/b"));
         }
 
         private static HttpWebResponse RequestWithBasicAuth(string requestUriString, string userName, string password)

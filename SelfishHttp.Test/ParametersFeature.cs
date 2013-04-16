@@ -16,7 +16,7 @@ namespace SelfishHttp.Test
                                                  });
 
             var client = new HttpClient();
-            var response = client.GetAsync(BaseUrl + "params?colour=crimson").Result;
+            var response = client.GetAsync(Url("/params?colour=crimson")).Result;
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
             var body = response.Content.ReadAsStringAsync().Result;
             Assert.That(body, Is.EqualTo("crimson"));

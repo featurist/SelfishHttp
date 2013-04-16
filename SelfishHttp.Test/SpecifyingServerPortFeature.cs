@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using NUnit.Framework;
 
 namespace SelfishHttp.Test
@@ -32,6 +33,7 @@ namespace SelfishHttp.Test
             var firstServerWithoutPort = new Server(8765);
             firstServerWithoutPort.OnGet("/").RespondWith("Rocking");
 
+            Assert.That(new Uri(firstServerWithoutPort.BaseUri).Port, Is.EqualTo(8765));
             var response = new HttpClient().GetAsync(firstServerWithoutPort.BaseUri).Result.Content.ReadAsStringAsync().Result;
             Assert.That(response, Is.EqualTo("Rocking"));
         }
