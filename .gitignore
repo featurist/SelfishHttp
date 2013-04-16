@@ -9,3 +9,4 @@ _ReSharper.*/
 StyleCop.Cache
 *.nupkg
 publish.bat
+_TeamCity.*/
