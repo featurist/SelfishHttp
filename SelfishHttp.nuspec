@@ -2,13 +2,13 @@
 <package>
   <metadata>
     <id>SelfishHttp</id>
-    <version>0.1.0</version>
-    <authors>Tim Macfarlane</authors>
+    <version>0.1.1</version>
+    <authors>Tim Macfarlane, Paul Campbell, Josh Chisholm</authors>
     <owners>Tim Macfarlane</owners>
     <projectUrl>https://github.com/featurist/SelfishHttp</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>self hosting HTTP server for testing</description>
-    <releaseNotes>better exception handling</releaseNotes>
+    <releaseNotes>allowing random ports</releaseNotes>
     <copyright>Copyright 2012</copyright>
     <tags>http</tags>
   </metadata>
