@@ -44,3 +44,7 @@ It supports:
 * Option to disable client caching in response headers
 
 See the [tests](https://github.com/featurist/SelfishHttp/tree/master/SelfishHttp.Test) for examples.
+
+### License
+
+BSD
