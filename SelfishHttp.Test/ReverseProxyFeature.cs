@@ -30,13 +30,13 @@ namespace SelfishHttp.Test
         public void ForwardsTheRequestButRewritesTheHostHeader()
         {
             _backendServer.OnGet("/stuff").Respond((req, res) => { res.Body = req.Headers["Host"]; });
-            _proxyServer.OnRequest().ForwardTo("http://thing.localtest.me:12346/");
+            _proxyServer.OnRequest().ForwardTo("http://localhost:12346/");
 
             var client = new HttpClient();
             var response = client.GetAsync(_proxyServer.BaseUri + "stuff").Result;
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
             var body = response.Content.ReadAsStringAsync().Result;
-            Assert.That(body, Is.EqualTo("thing.localtest.me:12346"));
+            Assert.That(body, Is.EqualTo("localhost:12346"));
         }
 
         [Test]

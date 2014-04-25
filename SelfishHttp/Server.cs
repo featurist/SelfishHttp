@@ -26,7 +26,7 @@ namespace SelfishHttp
 
         public Server(int port)
         {
-            _uriPrefix = String.Format("http://*:{0}/", port);
+            _uriPrefix = String.Format("http://localhost:{0}/", port);
             _baseUri = string.Format("http://localhost:{0}/", port);
             BodyParser = BodyParsers.DefaultBodyParser();
             BodyWriter = BodyWriters.DefaultBodyWriter();
