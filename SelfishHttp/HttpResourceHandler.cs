@@ -1,25 +1,26 @@
 using System;
 using System.Net;
-using System.Runtime.InteropServices;
 
 namespace SelfishHttp
 {
     public class HttpResourceHandler : IHttpResourceHandler
     {
-        public IServerConfiguration ServerConfiguration { get; private set; }
-        private string Method;
-        private string Path;
+        private string _method;
+        private string _path;
         private HttpHandler _pipeline;
-        private StringComparison Comparison;
+        private StringComparison _comparison;
+
+        public IServerConfiguration ServerConfiguration { get; private set; }
+        public AuthenticationSchemes? AuthenticationScheme { get; set; }
  
         public HttpResourceHandler(string method, string path, IServerConfiguration serverConfiguration)
         {
-            Method = method;
-            Path = path;
+            _method = method;
+            _path = path;
+            _pipeline = new HttpHandler(serverConfiguration);
+            _comparison = StringComparison.CurrentCulture;
             ServerConfiguration = serverConfiguration;
             AuthenticationScheme = AuthenticationSchemes.Anonymous;
-            _pipeline = new HttpHandler(serverConfiguration);
-            Comparison = StringComparison.CurrentCulture;
         }
 
         public void AddHandler(Action<HttpListenerContext, Action> handler)
@@ -32,16 +33,14 @@ namespace SelfishHttp
             _pipeline.Handle(context, next);
         }
 
-        public AuthenticationSchemes? AuthenticationScheme { get; set; }
-
         public bool Matches(HttpListenerRequest request)
         {
-            return request.HttpMethod == Method && string.Equals(request.Url.AbsolutePath, Path, Comparison);
+            return request.HttpMethod == _method && string.Equals(request.Url.AbsolutePath, _path, _comparison);
         }
 
         public IHttpResourceHandler IgnorePathCase()
         {
-            Comparison = StringComparison.CurrentCultureIgnoreCase;
+            _comparison = StringComparison.CurrentCultureIgnoreCase;
             return this;
         }
     }
