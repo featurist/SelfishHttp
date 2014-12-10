@@ -21,6 +21,26 @@ namespace SelfishHttp.Test
         }
 
         [Test]
+        public void ShouldHonourIgnorePathCaseAndReturnCorrectResource()
+        {
+            _server.OnGet("/Stuff").IgnorePathCase().RespondWith("yes, this is stuff");
+
+            var client = new HttpClient();
+            var response = client.GetAsync(Url("/stuff")).Result.Content.ReadAsStringAsync().Result;
+            Assert.That(response, Is.EqualTo("yes, this is stuff"));
+        }
+
+        [Test]
+        public void ShouldHonourPathCase()
+        {
+            _server.OnGet("/Stuff").RespondWith("yes, this is stuff");
+
+            var client = new HttpClient();
+            var response = client.GetAsync(Url("/stuff")).Result.IsSuccessStatusCode;
+            Assert.That(response, Is.False);
+        }
+
+        [Test]
         public void ShouldHonourNoCacheBeforeRespondWith()
         {
             _server.OnGet("/stuff").NoCache().RespondWith("yes, this is stuff");
