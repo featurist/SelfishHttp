@@ -10,7 +10,7 @@ namespace SelfishHttp
         private string Method;
         private string Path;
         private HttpHandler _pipeline;
-        private StringComparison _comparison;
+        private StringComparison Comparison;
  
         public HttpResourceHandler(string method, string path, IServerConfiguration serverConfiguration)
         {
@@ -19,7 +19,7 @@ namespace SelfishHttp
             ServerConfiguration = serverConfiguration;
             AuthenticationScheme = AuthenticationSchemes.Anonymous;
             _pipeline = new HttpHandler(serverConfiguration);
-            _comparison = StringComparison.Ordinal;
+            Comparison = StringComparison.CurrentCulture;
         }
 
         public void AddHandler(Action<HttpListenerContext, Action> handler)
@@ -36,12 +36,12 @@ namespace SelfishHttp
 
         public bool Matches(HttpListenerRequest request)
         {
-            return request.HttpMethod == Method && string.Equals(request.Url.AbsolutePath, Path, _comparison);
+            return request.HttpMethod == Method && string.Equals(request.Url.AbsolutePath, Path, Comparison);
         }
 
         public IHttpResourceHandler IgnorePathCase()
         {
-            _comparison = StringComparison.OrdinalIgnoreCase;
+            Comparison = StringComparison.CurrentCultureIgnoreCase;
             return this;
         }
     }
