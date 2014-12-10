@@ -1,5 +1,6 @@
 using System;
 using System.Net;
+using System.Runtime.InteropServices;
 
 namespace SelfishHttp
 {
@@ -9,6 +10,7 @@ namespace SelfishHttp
         private string Method;
         private string Path;
         private HttpHandler _pipeline;
+        private StringComparison _comparison;
  
         public HttpResourceHandler(string method, string path, IServerConfiguration serverConfiguration)
         {
@@ -17,6 +19,7 @@ namespace SelfishHttp
             ServerConfiguration = serverConfiguration;
             AuthenticationScheme = AuthenticationSchemes.Anonymous;
             _pipeline = new HttpHandler(serverConfiguration);
+            _comparison = StringComparison.Ordinal;
         }
 
         public void AddHandler(Action<HttpListenerContext, Action> handler)
@@ -33,7 +36,13 @@ namespace SelfishHttp
 
         public bool Matches(HttpListenerRequest request)
         {
-            return request.HttpMethod == Method && request.Url.AbsolutePath == Path;
+            return request.HttpMethod == Method && string.Equals(request.Url.AbsolutePath, Path, _comparison);
+        }
+
+        public IHttpResourceHandler IgnorePathCase()
+        {
+            _comparison = StringComparison.OrdinalIgnoreCase;
+            return this;
         }
     }
 }
