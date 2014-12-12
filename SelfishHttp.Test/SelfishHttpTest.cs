@@ -36,8 +36,8 @@ namespace SelfishHttp.Test
             _server.OnGet("/Stuff").RespondWith("yes, this is stuff");
 
             var client = new HttpClient();
-            var response = client.GetAsync(Url("/stuff")).Result.IsSuccessStatusCode;
-            Assert.That(response, Is.False);
+            var response = client.GetAsync(Url("/stuff")).Result;
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
         }
 
         [Test]
