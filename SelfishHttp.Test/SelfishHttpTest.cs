@@ -129,6 +129,31 @@ namespace SelfishHttp.Test
         }
 
         [Test]
+        public void ClearRemovesRegisteredHandlers()
+        {
+            _server.OnGet("/stuff").RespondWith("yes, this is stuff");
+            _server.Clear();
+
+            var client = new HttpClient();
+            var response = client.GetAsync(Url("/stuff")).Result.StatusCode;
+
+            Assert.That(response, Is.EqualTo(HttpStatusCode.NotFound));            
+        }
+
+        [Test]
+        public void ClearRemovesAllRequestRegisteredHandlers()
+        {
+            var hit = false;
+            
+            _server.OnRequest().AddHandler((req, rep) => hit = true);
+            _server.Clear();
+
+            var client = new HttpClient();
+            client.GetAsync(Url("/stuff")).Wait();
+            Assert.That(hit, Is.False);
+        }
+
+        [Test]
         public void Returns500WhenResponseHandlerThrowsException()
         {
             _server.OnGet("/error").Respond((req, res) => { throw new Exception("bad stuff!"); });
