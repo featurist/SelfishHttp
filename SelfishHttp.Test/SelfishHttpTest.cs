@@ -36,8 +36,8 @@ namespace SelfishHttp.Test
             _server.OnGet("/Stuff").RespondWith("yes, this is stuff");
 
             var client = new HttpClient();
-            var response = client.GetAsync(Url("/stuff")).Result.IsSuccessStatusCode;
-            Assert.That(response, Is.False);
+            var response = client.GetAsync(Url("/stuff")).Result;
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
         }
 
         [Test]
@@ -126,6 +126,31 @@ namespace SelfishHttp.Test
             var client = new HttpClient();
             var response = client.DeleteAsync(Url("/deletethis")).Result.Content.ReadAsStringAsync().Result;
             Assert.That(response, Is.EqualTo("deleted it"));
+        }
+
+        [Test]
+        public void ClearRemovesRegisteredHandlers()
+        {
+            _server.OnGet("/stuff").RespondWith("yes, this is stuff");
+            _server.Clear();
+
+            var client = new HttpClient();
+            var response = client.GetAsync(Url("/stuff")).Result.StatusCode;
+
+            Assert.That(response, Is.EqualTo(HttpStatusCode.NotFound));            
+        }
+
+        [Test]
+        public void ClearRemovesAllRequestRegisteredHandlers()
+        {
+            var hit = false;
+            
+            _server.OnRequest().AddHandler((req, rep) => hit = true);
+            _server.Clear();
+
+            var client = new HttpClient();
+            client.GetAsync(Url("/stuff")).Wait();
+            Assert.That(hit, Is.False);
         }
 
         [Test]

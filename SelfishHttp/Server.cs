@@ -13,6 +13,7 @@ namespace SelfishHttp
         private readonly string _baseUri;
         private HttpListener _listener;
         private readonly HttpHandler _anyRequestHandler;
+        private readonly object _locker = new object();
         private readonly List<IHttpResourceHandler> _resourceHandlers = new List<IHttpResourceHandler>();
 
         public IBodyParser BodyParser { get; set; }
@@ -83,7 +84,10 @@ namespace SelfishHttp
         private IHttpResourceHandler AddHttpHandler(string method, string path)
         {
             var httpHandler = new HttpResourceHandler(method, path, this);
-            _resourceHandlers.Add(httpHandler);
+            lock (_locker)
+            {
+                _resourceHandlers.Add(httpHandler);
+            }
             return httpHandler;
         }
 
@@ -116,6 +120,20 @@ namespace SelfishHttp
             _listener.BeginGetContext(HandleRequest, null);
         }
 
+        /// <summary>
+        ///     Clears this instance of any handlers registered by calls to <see cref="OnGet"/>, <see cref="OnHead"/>, 
+        ///     <see cref="OnPut"/>, <see cref="OnPatch"/>, <see cref="OnPost"/>, <see cref="OnDelete"/> or <see cref="OnOptions"/>.
+        ///     In addition, any handlers registered to the <see cref="OnRequest"/> <see cref="HttpHandler"/> instance are cleared.
+        /// </summary>
+        public void Clear()
+        {
+            lock (_locker)
+            {
+                _resourceHandlers.Clear();
+                _anyRequestHandler.Clear();
+            }
+        }
+
         public void Stop()
         {
             _listener.Stop();
@@ -136,7 +154,12 @@ namespace SelfishHttp
                     {
                         _anyRequestHandler.Handle(context, () =>
                         {
-                            var handler = _resourceHandlers.FirstOrDefault(h => h.Matches(req));
+                            IHttpResourceHandler handler;
+                            
+                            lock(_locker)
+                            {
+                                handler = _resourceHandlers.FirstOrDefault(h => h.Matches(req));
+                            }
 
                             if (handler != null)
                             {
