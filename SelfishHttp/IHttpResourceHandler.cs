@@ -13,6 +13,7 @@ namespace SelfishHttp
 
     public interface IHttpResourceHandler : IHttpHandler
     {
+        bool HasParameterMatching { get; }
         bool Matches(HttpListenerRequest request);
         IHttpResourceHandler IgnorePathCase();
     }

@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using NUnit.Framework;
 
 namespace SelfishHttp.Test
@@ -18,6 +19,36 @@ namespace SelfishHttp.Test
             var client = new HttpClient();
             var response = client.GetAsync(Url("/stuff")).Result.Content.ReadAsStringAsync().Result;
             Assert.That(response, Is.EqualTo("yes, this is stuff"));
+        }
+
+        [Test]
+        public void ShouldReturnCorrectResourceWhenMatchingParameters()
+        {
+            _server.OnGet("/stuff").RespondWith("yes, tc1");
+            _server.OnGet("/stuff", new { Id = ParamIs.Equal("1")} ).RespondWith("yes, tc2");
+            _server.OnGet("/stuff", new { Id = "2" } ).RespondWith("yes, tc3");
+            _server.OnGet("/stuff", new { Id = ParamIs.AllOf(new [] { "1", "2" }) }).RespondWith("yes, tc4");
+            _server.OnGet("/stuff", new { Id = ParamIs.AnyOf(new[] { "3", "4", "5" }) }).RespondWith("yes, tc5");
+            _server.OnGet("/stuff", new { Id = ParamIs.Like(new Regex("^[8-9][0-9]$")) }).RespondWith("yes, tc6");
+
+            _server.OnGet("/stuff", new { Id = 901, MyKey = ParamIs.Equal("Yes").Optional() }).RespondWith("yes, tc7");
+            _server.OnGet("/stuff", new { Id = 902, MyKey = ParamIs.Equal("Yes", StringComparison.OrdinalIgnoreCase).Optional() }).RespondWith("yes, tc8");
+
+            var client = new HttpClient();
+            Assert.That(client.GetAsync(Url("/stuff")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc1"));
+            Assert.That(client.GetAsync(Url("/stuff?id=1")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc2"));
+            Assert.That(client.GetAsync(Url("/stuff?id=2")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc3"));
+            Assert.That(client.GetAsync(Url("/stuff?id=1&id=2")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc4"));
+            Assert.That(client.GetAsync(Url("/stuff?id=3&id=5")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc5"));
+            Assert.That(client.GetAsync(Url("/stuff?id=92")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc6"));
+
+            Assert.That(client.GetAsync(Url("/stuff?id=901")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc7"));
+            Assert.That(client.GetAsync(Url("/stuff?id=901&mykey=Yes")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc7"));
+            Assert.That(client.GetAsync(Url("/stuff?id=901&mykey=yes")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc1"));
+
+            Assert.That(client.GetAsync(Url("/stuff?id=902")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc8"));
+            Assert.That(client.GetAsync(Url("/stuff?id=902&mykey=Yes")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc8"));
+            Assert.That(client.GetAsync(Url("/stuff?id=902&mykey=yes")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc8"));
         }
 
         [Test]
@@ -126,6 +157,31 @@ namespace SelfishHttp.Test
             var client = new HttpClient();
             var response = client.DeleteAsync(Url("/deletethis")).Result.Content.ReadAsStringAsync().Result;
             Assert.That(response, Is.EqualTo("deleted it"));
+        }
+
+        [Test]
+        public void ClearRemovesRegisteredHandlers()
+        {
+            _server.OnGet("/stuff").RespondWith("yes, this is stuff");
+            _server.Clear();
+
+            var client = new HttpClient();
+            var response = client.GetAsync(Url("/stuff")).Result.StatusCode;
+
+            Assert.That(response, Is.EqualTo(HttpStatusCode.NotFound));            
+        }
+
+        [Test]
+        public void ClearRemovesAllRequestRegisteredHandlers()
+        {
+            var hit = false;
+            
+            _server.OnRequest().AddHandler((req, rep) => hit = true);
+            _server.Clear();
+
+            var client = new HttpClient();
+            client.GetAsync(Url("/stuff")).Wait();
+            Assert.That(hit, Is.False);
         }
 
         [Test]
