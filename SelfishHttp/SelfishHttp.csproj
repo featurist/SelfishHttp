@@ -48,11 +48,18 @@
     <Compile Include="IBodyParser.cs" />
     <Compile Include="IBodyWriter.cs" />
     <Compile Include="IHttpResourceHandler.cs" />
-    <Compile Include="IParamsParser.cs" />
+    <Compile Include="Params\Matching\AllOfMatch.cs" />
+    <Compile Include="Params\Matching\BaseParamsMatch.cs" />
+    <Compile Include="Params\Matching\AnyOfMatch.cs" />
+    <Compile Include="Params\Matching\EqualityMatch.cs" />
+    <Compile Include="Params\Matching\IParamsMatch.cs" />
+    <Compile Include="Params\IParamsParser.cs" />
     <Compile Include="IRequest.cs" />
     <Compile Include="IResponse.cs" />
     <Compile Include="IServerConfiguration.cs" />
     <Compile Include="HttpResourceHandler.cs" />
+    <Compile Include="ParamIs.cs" />
+    <Compile Include="Params\Matching\RegexMatch.cs" />
     <Compile Include="ProxyHandlerExtensions.cs" />
     <Compile Include="RedirectHandlerExtensions.cs" />
     <Compile Include="Request.cs" />
@@ -63,8 +70,9 @@
     <Compile Include="Server.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StringHandlerExtensions.cs" />
-    <Compile Include="UrlParamsParser.cs" />
+    <Compile Include="Params\UrlParamsParser.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
