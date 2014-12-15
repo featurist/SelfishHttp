@@ -39,6 +39,7 @@
     <Reference Include="System.Net.Http, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Net.Http.2.0.20710.0\lib\net40\System.Net.Http.dll</HintPath>
     </Reference>
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -48,6 +49,7 @@
   <ItemGroup>
     <Compile Include="BasicAuthenticationFeature.cs" />
     <Compile Include="CrossOriginRequestsFeature.cs" />
+    <Compile Include="ParametersMatchingFeature.cs" />
     <Compile Include="ReverseProxyFeature.cs" />
     <Compile Include="ParametersFeature.cs" />
     <Compile Include="SelfishHttpFeature.cs" />
