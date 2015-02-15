@@ -86,11 +86,11 @@ namespace SelfishHttp
 
         private IHttpResourceHandler AddHttpHandler(string method, string path, object parameters)
         {
-            IDictionary<string, IParamsMatch> matches = null;
+            IDictionary<string, IParamMatch> matches = null;
 
             if (parameters != null)
             {
-                matches = parameters as IDictionary<string, IParamsMatch>;
+                matches = parameters as IDictionary<string, IParamMatch>;
 
                 if (matches != null)
                 {
@@ -98,14 +98,14 @@ namespace SelfishHttp
                 }
                 else
                 {
-                    matches = new Dictionary<string, IParamsMatch>();
+                    matches = new Dictionary<string, IParamMatch>();
                     var properties = TypeDescriptor.GetProperties(parameters);
 
                     foreach (PropertyDescriptor property in properties)
                     {
                         var propVal = property.GetValue(parameters);
-                        var paramMatch = propVal as IParamsMatch;
-                        matches[property.Name.ToLowerInvariant()] = paramMatch ?? new EqualityMatch(Convert.ToString(propVal), StringComparison.CurrentCulture);
+                        var paramMatch = propVal as IParamMatch;
+                        matches[property.Name.ToLowerInvariant()] = paramMatch ?? new StringMatch(Convert.ToString(propVal));
                     }
                 }
             }

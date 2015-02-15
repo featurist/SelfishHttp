@@ -27,12 +27,12 @@ namespace SelfishHttp.Test
             _server.OnGet("/stuff").RespondWith("yes, tc1");
             _server.OnGet("/stuff", new { Id = ParamIs.Equal("1")} ).RespondWith("yes, tc2");
             _server.OnGet("/stuff", new { Id = "2" } ).RespondWith("yes, tc3");
-            _server.OnGet("/stuff", new { Id = ParamIs.AllOf(new [] { "1", "2" }) }).RespondWith("yes, tc4");
-            _server.OnGet("/stuff", new { Id = ParamIs.AnyOf(new[] { "3", "4", "5" }) }).RespondWith("yes, tc5");
+            _server.OnGet("/stuff", new { Id = ParamIs.AllOf("1", "2") }).RespondWith("yes, tc4");
+            _server.OnGet("/stuff", new { Id = ParamIs.AnyOf("3", "4", "5") }).RespondWith("yes, tc5");
             _server.OnGet("/stuff", new { Id = ParamIs.Like(new Regex("^[8-9][0-9]$")) }).RespondWith("yes, tc6");
 
             _server.OnGet("/stuff", new { Id = 901, MyKey = ParamIs.Equal("Yes").Optional() }).RespondWith("yes, tc7");
-            _server.OnGet("/stuff", new { Id = 902, MyKey = ParamIs.Equal("Yes", StringComparison.OrdinalIgnoreCase).Optional() }).RespondWith("yes, tc8");
+            _server.OnGet("/stuff", new { Id = 902, MyKey = ParamIs.Equal("Yes").Optional().IgnoreCase() }).RespondWith("yes, tc8");
 
             var client = new HttpClient();
             Assert.That(client.GetAsync(Url("/stuff")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc1"));
