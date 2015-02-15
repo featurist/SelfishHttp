@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using SelfishHttp.Params;
+using SelfishHttp.Params.Matching;
 
 namespace SelfishHttp
 {
@@ -13,6 +16,7 @@ namespace SelfishHttp
         private readonly string _baseUri;
         private HttpListener _listener;
         private readonly HttpHandler _anyRequestHandler;
+        private readonly object _locker = new object();
         private readonly List<IHttpResourceHandler> _resourceHandlers = new List<IHttpResourceHandler>();
 
         public IBodyParser BodyParser { get; set; }
@@ -40,39 +44,39 @@ namespace SelfishHttp
             get { return _baseUri; }
         }
 
-        public IHttpResourceHandler OnGet(string path)
+        public IHttpResourceHandler OnGet(string path, object parameters = null)
         {
-            return AddHttpHandler("GET", path);
+            return AddHttpHandler("GET", path, parameters);
         }
 
-        public IHttpResourceHandler OnHead(string path)
+        public IHttpResourceHandler OnHead(string path, object parameters = null)
         {
-            return AddHttpHandler("HEAD", path);
+            return AddHttpHandler("HEAD", path, parameters);
         }
 
-        public IHttpResourceHandler OnPut(string path)
+        public IHttpResourceHandler OnPut(string path, object parameters = null)
         {
-            return AddHttpHandler("PUT", path);
+            return AddHttpHandler("PUT", path, parameters);
         }
 
-        public IHttpResourceHandler OnPatch(string path)
+        public IHttpResourceHandler OnPatch(string path, object parameters = null)
         {
-            return AddHttpHandler("PATCH", path);
+            return AddHttpHandler("PATCH", path, parameters);
         }
 
-        public IHttpResourceHandler OnPost(string path)
+        public IHttpResourceHandler OnPost(string path, object parameters = null)
         {
-            return AddHttpHandler("POST", path);
+            return AddHttpHandler("POST", path, parameters);
         }
 
-        public IHttpResourceHandler OnDelete(string path)
+        public IHttpResourceHandler OnDelete(string path, object parameters = null)
         {
-            return AddHttpHandler("DELETE", path);
+            return AddHttpHandler("DELETE", path, parameters);
         }
 
-        public IHttpResourceHandler OnOptions(string path)
+        public IHttpResourceHandler OnOptions(string path, object parameters = null)
         {
-            return AddHttpHandler("OPTIONS", path);
+            return AddHttpHandler("OPTIONS", path, parameters);
         }
 
         public IHttpHandler OnRequest()
@@ -80,10 +84,39 @@ namespace SelfishHttp
             return _anyRequestHandler;
         }
 
-        private IHttpResourceHandler AddHttpHandler(string method, string path)
+        private IHttpResourceHandler AddHttpHandler(string method, string path, object parameters)
         {
-            var httpHandler = new HttpResourceHandler(method, path, this);
-            _resourceHandlers.Add(httpHandler);
+            IDictionary<string, IParamMatch> matches = null;
+
+            if (parameters != null)
+            {
+                matches = parameters as IDictionary<string, IParamMatch>;
+
+                if (matches != null)
+                {
+                    matches = matches.ToDictionary(kv => kv.Key.ToLowerInvariant(), kv => kv.Value);
+                }
+                else
+                {
+                    matches = new Dictionary<string, IParamMatch>();
+                    var properties = TypeDescriptor.GetProperties(parameters);
+
+                    foreach (PropertyDescriptor property in properties)
+                    {
+                        var propVal = property.GetValue(parameters);
+                        var paramMatch = propVal as IParamMatch;
+                        matches[property.Name.ToLowerInvariant()] = paramMatch ?? new StringMatch(Convert.ToString(propVal));
+                    }
+                }
+            }
+
+            var httpHandler = new HttpResourceHandler(method, path, matches, this);
+
+            lock (_locker)
+            {
+                _resourceHandlers.Add(httpHandler);
+            }
+
             return httpHandler;
         }
 
@@ -116,6 +149,20 @@ namespace SelfishHttp
             _listener.BeginGetContext(HandleRequest, null);
         }
 
+        /// <summary>
+        ///     Clears this instance of any handlers registered by calls to <see cref="OnGet"/>, <see cref="OnHead"/>, 
+        ///     <see cref="OnPut"/>, <see cref="OnPatch"/>, <see cref="OnPost"/>, <see cref="OnDelete"/> or <see cref="OnOptions"/>.
+        ///     In addition, any handlers registered to the <see cref="OnRequest"/> <see cref="HttpHandler"/> instance are cleared.
+        /// </summary>
+        public void Clear()
+        {
+            lock (_locker)
+            {
+                _resourceHandlers.Clear();
+                _anyRequestHandler.Clear();
+            }
+        }
+
         public void Stop()
         {
             _listener.Stop();
@@ -136,7 +183,13 @@ namespace SelfishHttp
                     {
                         _anyRequestHandler.Handle(context, () =>
                         {
-                            var handler = _resourceHandlers.FirstOrDefault(h => h.Matches(req));
+                            IHttpResourceHandler handler;
+                            
+                            lock(_locker)
+                            {
+                                handler = _resourceHandlers.Where(h => h.HasParameterMatching).FirstOrDefault(h => h.Matches(req)) ??
+                                          _resourceHandlers.Where(h => !h.HasParameterMatching).FirstOrDefault(h => h.Matches(req));
+                            }
 
                             if (handler != null)
                             {
