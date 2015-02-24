@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace SelfishHttp.Params.Matching
 {
-    public class RegexMatch : BaseParamsMatch
+    public class RegexMatch : BaseParamMatch
     {
         private readonly Regex _expression;
 

@@ -6,44 +6,68 @@ namespace SelfishHttp
 {
     public static class ParamIs
     {
-        public static IParamsMatch AnyOf(string[] values, StringComparison comparison = StringComparison.CurrentCulture)
+        public static IStringParamMatch AnyOf(params string[] values)
         {
             if (values == null || values.Length == 0)
             {
                 throw new ArgumentException("Cannot be null or an empty array", "values");
             }
-            return new AnyOfMatch(values, comparison);
+
+            return new AnyOfMatch(values);
         }
 
-        public static IParamsMatch AllOf(string[] values, StringComparison comparison = StringComparison.CurrentCulture)
+        public static IStringParamMatch AllOf(params string[] values)
         {
             if (values == null || values.Length == 0)
             {
                 throw new ArgumentException("Cannot be null or an empty array", "values");
             }
-            return new AllOfMatch(values, comparison);
+
+            return new AllOfMatch(values);
         }
 
-        public static IParamsMatch Equal(string value, StringComparison comparison = StringComparison.CurrentCulture)
+        public static IStringParamMatch Equal(string value)
         {
-            return new EqualityMatch(value, comparison);
+            return new StringMatch(value);
         }
 
-        public static IParamsMatch Like(Regex expression)
+        public static IParamMatch Like(string pattern)
+        {
+            return Like(new Regex(pattern));
+        }
+
+        public static IParamMatch Like(string pattern, RegexOptions options)
+        {
+            return Like(new Regex(pattern, options));
+        }
+
+        public static IParamMatch Like(Regex expression)
         {
             if (expression == null)
             {
                 throw new ArgumentNullException("expression");
             }
+
             return new RegexMatch(expression);
         }
 
-        public static IParamsMatch Custom(IParamsMatch match)
+        public static IParamMatch Equal(Func<string, bool> callback)
+        {
+            if (callback == null)
+            {
+                throw new ArgumentNullException("callback");
+            }
+
+            return new CallbackMatch(callback);
+        }
+
+        public static IParamMatch Custom(IParamMatch match)
         {
             if (match == null)
             {
                 throw new ArgumentNullException("match");
             }
+
             return match;
         }
     }

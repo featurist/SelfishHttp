@@ -3,19 +3,17 @@ using System.Linq;
 
 namespace SelfishHttp.Params.Matching
 {
-    public class AllOfMatch : BaseParamsMatch
+    public class AllOfMatch : BaseStringParamMatch
     {
         private readonly string[] _allOf;
-        private readonly StringComparison _comparison;
 
-        public AllOfMatch(string[] allOf, StringComparison comparison)
+        public AllOfMatch(string[] allOf)
         {
             if (allOf == null)
             {
                 throw new ArgumentNullException("allOf");
             }
             _allOf = allOf;
-            _comparison = comparison;
         }
 
         public override bool IsMatch(string[] values)
@@ -25,7 +23,7 @@ namespace SelfishHttp.Params.Matching
                 return false;
             }
 
-            return values.All(v => _allOf.Any(of => of.Equals(v, _comparison))) && _allOf.All(of => values.Any(v => v.Equals(of, _comparison)));
+            return values.All(v => _allOf.Any(of => of.Equals(v, Comparison))) && _allOf.All(of => values.Any(v => v.Equals(of, Comparison)));
         }
     }
 }

@@ -10,7 +10,7 @@ namespace SelfishHttp
     {
         private string _method;
         private string _path;
-        private readonly IDictionary<string, IParamsMatch> _paramsMatches;
+        private readonly IDictionary<string, IParamMatch> _paramsMatches;
         private HttpHandler _pipeline;
         private StringComparison _comparison;
 
@@ -22,7 +22,7 @@ namespace SelfishHttp
             get { return _paramsMatches != null; }
         }
 
-        public HttpResourceHandler(string method, string path, IDictionary<string, IParamsMatch> paramsMatches, IServerConfiguration serverConfiguration)
+        public HttpResourceHandler(string method, string path, IDictionary<string, IParamMatch> paramsMatches, IServerConfiguration serverConfiguration)
         {
             _method = method;
             _path = path;

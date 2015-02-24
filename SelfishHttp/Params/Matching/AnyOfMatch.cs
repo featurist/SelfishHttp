@@ -3,24 +3,22 @@ using System.Linq;
 
 namespace SelfishHttp.Params.Matching
 {
-    public class AnyOfMatch : BaseParamsMatch
+    public class AnyOfMatch : BaseStringParamMatch
     {
         private readonly string[] _anyOf;
-        private readonly StringComparison _comparison;
 
-        public AnyOfMatch(string[] anyOf, StringComparison comparison)
+        public AnyOfMatch(string[] anyOf)
         {
             if (anyOf == null)
             {
                 throw new ArgumentNullException("anyOf");
             }
             _anyOf = anyOf;
-            _comparison = comparison;
         }
 
         public override bool IsMatch(string[] values)
         {
-            return values.All(v => _anyOf.Any(of => of.Equals(v, _comparison)));
+            return values.All(v => _anyOf.Any(of => of.Equals(v, Comparison)));
         }
     }
 }
