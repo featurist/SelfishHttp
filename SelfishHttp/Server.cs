@@ -17,7 +17,7 @@ namespace SelfishHttp
         private HttpListener _listener;
         private readonly HttpHandler _anyRequestHandler;
         private readonly object _locker = new object();
-        private readonly List<IHttpResourceHandler> _resourceHandlers = new List<IHttpResourceHandler>();
+        private readonly Stack<IHttpResourceHandler> _resourceHandlers = new Stack<IHttpResourceHandler>();
 
         public IBodyParser BodyParser { get; set; }
         public IBodyWriter BodyWriter { get; set; }
@@ -114,7 +114,7 @@ namespace SelfishHttp
 
             lock (_locker)
             {
-                _resourceHandlers.Add(httpHandler);
+                _resourceHandlers.Push(httpHandler);
             }
 
             return httpHandler;
