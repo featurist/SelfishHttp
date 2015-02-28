@@ -26,7 +26,9 @@ namespace SelfishHttp
 
         public event EventHandler<RequestEventArgs> RequestBegin;
 
-        public event EventHandler<RequestEventArgs> RequestNotFound;
+        public event EventHandler<RequestEventArgs> RequestEnd;
+
+        public event EventHandler<RequestEventArgs> RequestUnhandled;
 
         public event EventHandler<RequestErrorEventArgs> RequestError; 
 
@@ -207,8 +209,10 @@ namespace SelfishHttp
                             else
                             {
                                 res.StatusCode = 404;
-                                OnRequestNotFound(new RequestEventArgs {Request = req, Response = res});
+                                OnRequestUnhandled(new RequestEventArgs {Request = req, Response = res});
                             }
+
+                            OnRequestEnd(new RequestEventArgs {Request = req, Response = res});
                         });
 
                         res.Close();
@@ -265,9 +269,9 @@ namespace SelfishHttp
             return port;
         }
 
-        private void OnRequestNotFound(RequestEventArgs e)
+        private void OnRequestUnhandled(RequestEventArgs e)
         {
-            var handler = RequestNotFound;
+            var handler = RequestUnhandled;
             if (handler != null) handler(this, e);
         }
 
@@ -280,6 +284,12 @@ namespace SelfishHttp
         private void OnRequestBegin(RequestEventArgs e)
         {
             var handler = RequestBegin;
+            if (handler != null) handler(this, e);
+        }
+
+        private void OnRequestEnd(RequestEventArgs e)
+        {
+            var handler = RequestEnd;
             if (handler != null) handler(this, e);
         }
     }
