@@ -64,6 +64,36 @@ namespace SelfishHttp.Test
         }
 
         [Test]
+        public void ShouldHonourFifoRegistrationsWhenUsingParameterMatching()
+        {
+            var client = new HttpClient();
+
+            _server.OnGet("/stuff", new { Id = ParamIs.Equal("2") }).RespondWith("yes, this is stuff");
+            var responseFirst = client.GetAsync(Url("/stuff?id=2")).Result;
+
+            _server.OnGet("/stuff", new { Id = "2" }).RespondWith("my mistake, this is stuff");
+            var responseSecond = client.GetAsync(Url("/stuff?id=2")).Result;
+
+            Assert.That(responseFirst.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, this is stuff"));
+            Assert.That(responseSecond.Content.ReadAsStringAsync().Result, Is.EqualTo("my mistake, this is stuff"));
+        }
+
+        [Test]
+        public void ShouldHonourFifoRegistrations()
+        {
+            var client = new HttpClient();
+            
+            _server.OnGet("/stuff").RespondWith("yes, this is stuff");
+            var responseFirst = client.GetAsync(Url("/stuff")).Result;
+
+            _server.OnGet("/stuff").RespondWith("my mistake, this is stuff");
+            var responseSecond = client.GetAsync(Url("/stuff")).Result;
+
+            Assert.That(responseFirst.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, this is stuff"));
+            Assert.That(responseSecond.Content.ReadAsStringAsync().Result, Is.EqualTo("my mistake, this is stuff"));
+        }
+
+        [Test]
         public void ShouldHonourPathCase()
         {
             _server.OnGet("/Stuff").RespondWith("yes, this is stuff");
