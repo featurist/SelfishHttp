@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.Serialization;
 using SelfishHttp.Params;
 using SelfishHttp.Params.Matching;
 
@@ -22,6 +23,12 @@ namespace SelfishHttp
         public IBodyParser BodyParser { get; set; }
         public IBodyWriter BodyWriter { get; set; }
         public IParamsParser ParamsParser { get; set; }
+
+        public event EventHandler<RequestEventArgs> RequestBegin;
+
+        public event EventHandler<RequestEventArgs> RequestNotFound;
+
+        public event EventHandler<RequestErrorEventArgs> RequestError; 
 
         public Server()
             : this(ChooseRandomUnusedPort())
@@ -181,6 +188,8 @@ namespace SelfishHttp
 
                     try
                     {
+                        OnRequestBegin(new RequestEventArgs {Request = req, Response = res});
+
                         _anyRequestHandler.Handle(context, () =>
                         {
                             IHttpResourceHandler handler;
@@ -198,6 +207,7 @@ namespace SelfishHttp
                             else
                             {
                                 res.StatusCode = 404;
+                                OnRequestNotFound(new RequestEventArgs {Request = req, Response = res});
                             }
                         });
 
@@ -205,8 +215,10 @@ namespace SelfishHttp
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine(ex);
                         res.StatusCode = 500;
+                        OnRequestError(new RequestErrorEventArgs { Exception = ex, Request = req, Response = res });
+                            
+                        Console.WriteLine(ex);
                         using (var output = new StreamWriter(res.OutputStream))
                         {
                             output.Write(ex);
@@ -251,6 +263,24 @@ namespace SelfishHttp
             var port = ((IPEndPoint)listener.LocalEndpoint).Port;
             listener.Stop();
             return port;
+        }
+
+        private void OnRequestNotFound(RequestEventArgs e)
+        {
+            var handler = RequestNotFound;
+            if (handler != null) handler(this, e);
+        }
+
+        private void OnRequestError(RequestErrorEventArgs e)
+        {
+            var handler = RequestError;
+            if (handler != null) handler(this, e);
+        }
+
+        private void OnRequestBegin(RequestEventArgs e)
+        {
+            var handler = RequestBegin;
+            if (handler != null) handler(this, e);
         }
     }
 }

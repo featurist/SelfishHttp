@@ -44,10 +44,12 @@
     <Compile Include="BodyParsers.cs" />
     <Compile Include="BodyWriters.cs" />
     <Compile Include="CrossOriginRequestExtensions.cs" />
+    <Compile Include="RequestErrorEventArgs.cs" />
     <Compile Include="HttpHandlerPipeline.cs" />
     <Compile Include="IBodyParser.cs" />
     <Compile Include="IBodyWriter.cs" />
     <Compile Include="IHttpResourceHandler.cs" />
+    <Compile Include="RequestEventArgs.cs" />
     <Compile Include="Params\Matching\AllOfMatch.cs" />
     <Compile Include="Params\Matching\AnythingMatch.cs" />
     <Compile Include="Params\Matching\BaseParamMatch.cs" />
