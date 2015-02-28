@@ -1,5 +1,6 @@
 using System;
 using System.Text.RegularExpressions;
+using System.Web.UI;
 using SelfishHttp.Params.Matching;
 
 namespace SelfishHttp
@@ -29,6 +30,21 @@ namespace SelfishHttp
         public static IStringParamMatch Equal(string value)
         {
             return new StringMatch(value);
+        }
+
+        public static IIntParamMatch Int()
+        {
+            return new IntMatch();
+        }
+
+        public static IParamMatch Empty()
+        {
+            return new EmptyMatch();
+        }
+
+        public static IParamMatch Anything()
+        {
+            return new AnythingMatch();
         }
 
         public static IParamMatch Like(string pattern)

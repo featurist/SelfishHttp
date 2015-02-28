@@ -36,6 +36,7 @@ namespace SelfishHttp.Test
         {
             _server.OnGet("/stuff").RespondWith("yes, tc1");
             _server.OnGet("/stuff", new { Id = "2" } ).RespondWith("yes, tc3");
+            _server.OnGet("/stuff", new { Id = "(2+4)*10=60" }).RespondWith("yes, tc60");
             _server.OnGet("/stuff", new { Id = ParamIs.Equal("1")} ).RespondWith("yes, tc2");
             _server.OnGet("/stuff", new { Id = ParamIs.AllOf("1", "2") }).RespondWith("yes, tc4");
             _server.OnGet("/stuff", new { Id = ParamIs.AnyOf("3", "4", "5") }).RespondWith("yes, tc5");
@@ -49,6 +50,7 @@ namespace SelfishHttp.Test
             Assert.That(client.GetAsync(Url("/stuff")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc1"));
             Assert.That(client.GetAsync(Url("/stuff?id=1")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc2"));
             Assert.That(client.GetAsync(Url("/stuff?id=2")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc3"));
+            Assert.That(client.GetAsync(Url("/stuff?id=(2%2b4)*10%3d60")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc60"));
             Assert.That(client.GetAsync(Url("/stuff?id=1&id=2")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc4"));
             Assert.That(client.GetAsync(Url("/stuff?id=3&id=5")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc5"));
             Assert.That(client.GetAsync(Url("/stuff?id=91")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc6"));

@@ -17,7 +17,7 @@ namespace SelfishHttp.Test
 
         public string Url(string path)
         {
-            return new Uri(new Uri(_server.BaseUri), path).ToString();
+            return new Uri(new Uri(_server.BaseUri), path).AbsoluteUri;
         }
 
         [TearDown]

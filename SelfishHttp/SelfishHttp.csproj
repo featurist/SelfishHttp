@@ -49,10 +49,14 @@
     <Compile Include="IBodyWriter.cs" />
     <Compile Include="IHttpResourceHandler.cs" />
     <Compile Include="Params\Matching\AllOfMatch.cs" />
+    <Compile Include="Params\Matching\AnythingMatch.cs" />
     <Compile Include="Params\Matching\BaseParamMatch.cs" />
     <Compile Include="Params\Matching\AnyOfMatch.cs" />
     <Compile Include="Params\Matching\BaseStringParamMatch.cs" />
     <Compile Include="Params\Matching\CallbackMatch.cs" />
+    <Compile Include="Params\Matching\EmptyMatch.cs" />
+    <Compile Include="Params\Matching\IIntParamMatch.cs" />
+    <Compile Include="Params\Matching\IntMatch.cs" />
     <Compile Include="Params\Matching\StringMatch.cs" />
     <Compile Include="Params\Matching\IParamMatch.cs" />
     <Compile Include="Params\IParamsParser.cs" />
