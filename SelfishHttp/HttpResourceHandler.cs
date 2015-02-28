@@ -13,6 +13,7 @@ namespace SelfishHttp
         private readonly IDictionary<string, IParamMatch> _paramsMatches;
         private HttpHandler _pipeline;
         private StringComparison _comparison;
+        private StringComparer _comparer;
 
         public IServerConfiguration ServerConfiguration { get; private set; }
         public AuthenticationSchemes? AuthenticationScheme { get; set; }
@@ -29,6 +30,7 @@ namespace SelfishHttp
             _paramsMatches = paramsMatches;
             _pipeline = new HttpHandler(serverConfiguration);
             _comparison = StringComparison.CurrentCulture;
+            _comparer = StringComparer.CurrentCulture;
             ServerConfiguration = serverConfiguration;
             AuthenticationScheme = AuthenticationSchemes.Anonymous;
         }
@@ -63,19 +65,25 @@ namespace SelfishHttp
                 return false;
             }
 
-            var absentKeys = parameterKeys.Except(_paramsMatches.Keys).ToArray();
+            var absentKeys = parameterKeys.Except(_paramsMatches.Keys, _comparer).ToArray();
 
-            if (absentKeys.Any() && !absentKeys.All(mk => _paramsMatches.ContainsKey(mk) && _paramsMatches[mk].IsOptional))
+            if (absentKeys.Any() && !absentKeys.All(k => _paramsMatches.Any(kv => kv.Key.Equals(k, _comparison) && kv.Value.IsOptional)))
             {
                 return false;
             }
 
-            return _paramsMatches.Keys.Intersect(parameterKeys).All(k => _paramsMatches[k].IsMatch(parameters.GetValues(k)));
+            return _paramsMatches.Keys.Intersect(parameterKeys, _comparer).All(k => _paramsMatches.First(kv => kv.Key.Equals(k, _comparison)).Value.IsMatch(parameters.GetValues(k)));
         }
 
         public IHttpResourceHandler IgnorePathCase()
         {
             _comparison = StringComparison.CurrentCultureIgnoreCase;
+            return this;
+        }
+
+        public IHttpResourceHandler IgnoreParameterCase()
+        {
+            _comparer = StringComparer.CurrentCultureIgnoreCase;
             return this;
         }
     }

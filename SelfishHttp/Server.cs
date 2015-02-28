@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -103,7 +104,7 @@ namespace SelfishHttp
 
                 if (matches != null)
                 {
-                    matches = matches.ToDictionary(kv => kv.Key.ToLowerInvariant(), kv => kv.Value);
+                    matches = matches.ToDictionary(kv => kv.Key, kv => kv.Value);
                 }
                 else
                 {
@@ -114,7 +115,7 @@ namespace SelfishHttp
                     {
                         var propVal = property.GetValue(parameters);
                         var paramMatch = propVal as IParamMatch;
-                        matches[property.Name.ToLowerInvariant()] = paramMatch ?? new StringMatch(Convert.ToString(propVal));
+                        matches[property.Name] = paramMatch ?? new StringMatch(Convert.ToString(propVal));
                     }
                 }
             }

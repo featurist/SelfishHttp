@@ -16,5 +16,6 @@ namespace SelfishHttp
         bool HasParameterMatching { get; }
         bool Matches(HttpListenerRequest request);
         IHttpResourceHandler IgnorePathCase();
+        IHttpResourceHandler IgnoreParameterCase();
     }
 }
