@@ -1,3 +1,5 @@
+using SelfishHttp.Params;
+
 namespace SelfishHttp
 {
     public interface IServerConfiguration
