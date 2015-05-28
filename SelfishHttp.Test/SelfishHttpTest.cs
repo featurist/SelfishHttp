@@ -166,6 +166,21 @@ namespace SelfishHttp.Test
         }
 
         [Test]
+        public void ShouldReturnCorrectResourceWhenMatchingParameterArrays()
+        {
+            _server.OnGet("/stuff").RespondWith("yes, tc1");
+            _server.OnGet("/stuff", new { p = ParamIs.AllOf("2", "3", "4") }).RespondWith("yes, tc2");
+            _server.OnGet("/stuff", new { p = ParamIs.AnyOf("6", "7", "8", "9" ) }).RespondWith("yes, tc3");
+
+            var client = new HttpClient();
+            Assert.That(client.GetAsync(Url("/stuff")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc1"));
+            Assert.That(client.GetAsync(Url("/stuff?p[]=2&p[]=3&p[]=4")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc2"));
+            Assert.That(client.GetAsync(Url("/stuff?p[]=6&p[]=7&p[]=8")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc3"));
+            Assert.That(client.GetAsync(Url("/stuff?p[0]=2&p[1]=3&p[2]=4")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc2"));
+            Assert.That(client.GetAsync(Url("/stuff?p[0]=6&p[1]=7&p[2]=8")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc3"));
+        }
+
+        [Test]
         public void ShouldReturnCorrectResourceWhenMatchingParameters()
         {
             _server.OnGet("/stuff").RespondWith("yes, tc1");

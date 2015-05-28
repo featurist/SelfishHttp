@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Net;
 using SelfishHttp.Params.Matching;
@@ -58,7 +59,7 @@ namespace SelfishHttp
             }
 
             var parameters = ServerConfiguration.ParamsParser.ParseParams(request);
-            var parameterKeys = parameters.Keys.Cast<string>().ToArray();
+            var parameterKeys = parameters.Keys.Cast<string>().Select(k => !k.Contains('[') ? k : k.Substring(0, k.IndexOf('['))).Distinct().ToArray();
 
             if (!parameterKeys.Any())
             {
@@ -72,7 +73,7 @@ namespace SelfishHttp
                 return false;
             }
 
-            return _paramsMatches.Keys.Intersect(parameterKeys, _comparer).All(k => _paramsMatches.First(kv => kv.Key.Equals(k, _comparison)).Value.IsMatch(parameters.GetValues(k)));
+            return _paramsMatches.Keys.Intersect(parameterKeys, _comparer).All(k => _paramsMatches.First(kv => kv.Key.Equals(k, _comparison)).Value.IsMatch(GetValues(parameters, k)));
         }
 
         public IHttpResourceHandler IgnorePathCase()
@@ -85,6 +86,19 @@ namespace SelfishHttp
         {
             _comparer = StringComparer.CurrentCultureIgnoreCase;
             return this;
+        }
+
+        private string[] GetValues(NameValueCollection parameters, string key)
+        {
+            var keys = parameters.Keys.Cast<string>().ToArray();
+            if (keys.Any(k => k.Equals(key)))
+            {
+                return parameters.GetValues(key);
+            }
+            return keys
+                .Where(k => k.Length > key.Length + 1 && k.Substring(key.Length, 1).Equals("["))
+                .SelectMany(parameters.GetValues)
+                .ToArray();
         }
     }
 }
