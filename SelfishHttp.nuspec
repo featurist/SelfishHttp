@@ -10,6 +10,7 @@
     <description>A self hosting HTTP server for testing.</description>
     <copyright>Copyright 2017</copyright>
     <tags>http testing tests mocking mocks</tags>
+	<iconUrl><![CDATA[https://avatars2.githubusercontent.com/u/10597031?s=200]]></iconUrl>
   </metadata>
   <files>
     <file src="SelfishHttp\bin\Release\v4.0\SelfishHttp.dll" target="lib\net40" />
