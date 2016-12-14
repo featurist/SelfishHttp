@@ -136,6 +136,21 @@ namespace SelfishHttp.Test
         }
 
         [Test]
+        public void ShouldReturnCorrectResourceWhenEndingWithASlash()
+        {
+            _server.OnGet("/stuff").RespondWith("yes, tc1");
+            _server.OnGet("/other/").RespondWith("yes, tc2");
+
+            var client = new HttpClient();
+
+            Assert.That(client.GetAsync(Url("/stuff")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc1"));
+            Assert.That(client.GetAsync(Url("/stuff/")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc1"));
+
+            Assert.That(client.GetAsync(Url("/other")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc2"));
+            Assert.That(client.GetAsync(Url("/other/")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc2"));
+        }
+
+        [Test]
         public void ShouldReturnCorrectResourceWhenNotMatchingParameters()
         {
             _server.OnGet("/stuff").RespondWith("yes, tc1");

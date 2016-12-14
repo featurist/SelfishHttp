@@ -27,7 +27,7 @@ namespace SelfishHttp
         public HttpResourceHandler(string method, string path, IDictionary<string, IParamMatch> paramsMatches, IServerConfiguration serverConfiguration)
         {
             _method = method;
-            _path = path;
+            _path = !path.EndsWith("/") ? path : path.Substring(0, path.Length - 1);
             _paramsMatches = paramsMatches;
             _pipeline = new HttpHandler(serverConfiguration);
             _comparison = StringComparison.CurrentCulture;
@@ -48,7 +48,8 @@ namespace SelfishHttp
 
         public bool Matches(HttpListenerRequest request)
         {
-            return request.HttpMethod == _method && string.Equals(request.Url.AbsolutePath, _path, _comparison) && MatchParameters(request);
+            var testPath = request.Url.AbsolutePath;
+            return request.HttpMethod == _method && string.Equals(!testPath.EndsWith("/") ? testPath : testPath.Substring(0, testPath.Length - 1), _path, _comparison) && MatchParameters(request);
         }
 
         private bool MatchParameters(HttpListenerRequest request)
