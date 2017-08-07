@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.Serialization;
 using SelfishHttp.Params;
 using SelfishHttp.Params.Matching;
 
@@ -15,14 +13,19 @@ namespace SelfishHttp
     public class Server : IDisposable, IServerConfiguration
     {
         private readonly string _uriPrefix;
-        private readonly string _baseUri;
         private HttpListener _listener;
         private readonly HttpHandler _anyRequestHandler;
         private readonly object _locker = new object();
         private readonly Stack<IHttpResourceHandler> _resourceHandlers = new Stack<IHttpResourceHandler>();
+        
+        public int Port { get; }
+
+        public string BaseUri { get; }
 
         public IBodyParser BodyParser { get; set; }
+
         public IBodyWriter BodyWriter { get; set; }
+        
         public IParamsParser ParamsParser { get; set; }
 
         public event EventHandler<RequestEventArgs> RequestBegin;
@@ -40,18 +43,14 @@ namespace SelfishHttp
 
         public Server(int port)
         {
-            _uriPrefix = String.Format("http://localhost:{0}/", port);
-            _baseUri = string.Format("http://localhost:{0}/", port);
+            Port = port;
+            _uriPrefix = $"http://localhost:{port}/";
+            BaseUri = $"http://localhost:{port}/";
             BodyParser = BodyParsers.DefaultBodyParser();
             BodyWriter = BodyWriters.DefaultBodyWriter();
             ParamsParser = new UrlParamsParser();
             _anyRequestHandler = new HttpHandler(this);
             Start();
-        }
-
-        public string BaseUri
-        {
-            get { return _baseUri; }
         }
 
         public IHttpResourceHandler OnGet(string path, object parameters = null)
@@ -186,8 +185,8 @@ namespace SelfishHttp
                 if (_listener.IsListening)
                 {
                     HandleNextRequest();
-                    HttpListenerRequest req = context.Request;
-                    HttpListenerResponse res = context.Response;
+                    var req = context.Request;
+                    var res = context.Response;
 
                     try
                     {
@@ -246,11 +245,11 @@ namespace SelfishHttp
         }
 
         /// <summary>
-        /// Return true if the exception is: The I/O operation has been aborted because of either a thread exit or an application request.
-        /// Happens when we stop the server and the listening is cancelled.
+        ///     Return true if the exception is: The I/O operation has been aborted because of either a thread exit or an application request.
+        ///     Happens when we stop the server and the listening is cancelled.
         /// </summary>
-        /// <param name="e"></param>
-        /// <returns></returns>
+        /// <param name="e">The event argument.</param>
+        /// <returns><c>true</c> if operation is aborted on server; else, <c>false</c></returns>
         private static bool IsOperationAbortedOnStoppingServer(HttpListenerException e)
         {
             return e.NativeErrorCode == 0x000003E3;
@@ -272,26 +271,22 @@ namespace SelfishHttp
 
         private void OnRequestUnhandled(RequestEventArgs e)
         {
-            var handler = RequestUnhandled;
-            if (handler != null) handler(this, e);
+            RequestUnhandled?.Invoke(this, e);
         }
 
         private void OnRequestError(RequestErrorEventArgs e)
         {
-            var handler = RequestError;
-            if (handler != null) handler(this, e);
+            RequestError?.Invoke(this, e);
         }
 
         private void OnRequestBegin(RequestEventArgs e)
         {
-            var handler = RequestBegin;
-            if (handler != null) handler(this, e);
+            RequestBegin?.Invoke(this, e);
         }
 
         private void OnRequestEnd(RequestEventArgs e)
         {
-            var handler = RequestEnd;
-            if (handler != null) handler(this, e);
+            RequestEnd?.Invoke(this, e);
         }
     }
 }
