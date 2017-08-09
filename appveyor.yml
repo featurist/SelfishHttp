@@ -1,6 +1,5 @@
 version: 5.1.{build}
 install:
-- cmd: set PATH=C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\MSBuild\15.0\Bin\;%PATH%
 - ps: "Set-AppveyorBuildVariable 'APPVEYOR_BUILD_INFO_VERSION' $env:APPVEYOR_BUILD_VERSION"
 - ps: "if ($env:APPVEYOR_REPO_BRANCH -ieq \"development\")\n{\n Set-AppveyorBuildVariable 'APPVEYOR_BUILD_INFO_VERSION' $($env:APPVEYOR_BUILD_INFO_VERSION + '-beta') \n}"
 branches:
