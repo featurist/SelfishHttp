@@ -10,9 +10,8 @@ namespace SelfishHttp.Params.Matching
         public AnyOfMatch(string[] anyOf)
         {
             if (anyOf == null)
-            {
                 throw new ArgumentNullException("anyOf");
-            }
+
             _anyOf = anyOf;
         }
 

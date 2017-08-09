@@ -1,6 +1,8 @@
 ﻿using System.Text.RegularExpressions;
 using System.Web;
+
 using NUnit.Framework;
+
 using SelfishHttp.Params.Matching;
 
 namespace SelfishHttp.Test
@@ -114,7 +116,6 @@ namespace SelfishHttp.Test
         {
             var parameters = HttpUtility.ParseQueryString("?id=1&id=2");
             Assert.That(new AllOfMatch(new[] {"1"}).IsMatch(parameters.GetValues("id")), Is.False);
-
             parameters = HttpUtility.ParseQueryString("?id=1");
             Assert.That(new AllOfMatch(new[] {"1", "2"}).IsMatch(parameters.GetValues("id")), Is.False);
         }
@@ -124,7 +125,6 @@ namespace SelfishHttp.Test
         {
             var parameters = HttpUtility.ParseQueryString("?id=1&id=2&id=3&id=4");
             Assert.That(new AllOfMatch(new[] {"1", "2", "3"}).IsMatch(parameters.GetValues("id")), Is.False);
-
             parameters = HttpUtility.ParseQueryString("?id=1&id=2");
             Assert.That(new AllOfMatch(new[] {"1", "2", "3"}).IsMatch(parameters.GetValues("id")), Is.False);
         }
@@ -148,7 +148,6 @@ namespace SelfishHttp.Test
         {
             var parameters = HttpUtility.ParseQueryString("?id=1");
             Assert.That(new AnyOfMatch(new[] {"2"}).IsMatch(parameters.GetValues("id")), Is.False);
-
             parameters = HttpUtility.ParseQueryString("?id=1&id=2");
             Assert.That(new AnyOfMatch(new[] {"3"}).IsMatch(parameters.GetValues("id")), Is.False);
         }
@@ -158,7 +157,6 @@ namespace SelfishHttp.Test
         {
             var parameters = HttpUtility.ParseQueryString("?id=1&id=2");
             Assert.That(new AnyOfMatch(new[] {"3", "4"}).IsMatch(parameters.GetValues("id")), Is.False);
-
             parameters = HttpUtility.ParseQueryString("?id=1&id=2&id=3");
             Assert.That(new AnyOfMatch(new[] {"3", "4"}).IsMatch(parameters.GetValues("id")), Is.False);
         }

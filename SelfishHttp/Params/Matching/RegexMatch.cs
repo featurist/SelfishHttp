@@ -11,9 +11,8 @@ namespace SelfishHttp.Params.Matching
         public RegexMatch(Regex expression)
         {
             if (expression == null)
-            {
                 throw new ArgumentNullException("expression");
-            }
+
             _expression = expression;
         }
 

@@ -1,4 +1,5 @@
 using System;
+
 using NUnit.Framework;
 
 namespace SelfishHttp.Test
@@ -11,7 +12,7 @@ namespace SelfishHttp.Test
         [SetUp]
         public void SetUp()
         {
-            int port = 12345;
+            var port = 12345;
             _server = new Server(port);
         }
 

@@ -5,7 +5,7 @@ namespace SelfishHttp.Params.Matching
 {
     public class IntMatch : BaseParamMatch, IIntParamMatch
     {
-        private Func<int, bool> _constraint; 
+        private Func<int, bool> _constraint;
 
         public override bool IsMatch(string[] values)
         {
@@ -13,9 +13,7 @@ namespace SelfishHttp.Params.Matching
             {
                 int t;
                 if (int.TryParse(v, out t))
-                {
                     return _constraint == null || _constraint(t);
-                }
 
                 return false;
             });

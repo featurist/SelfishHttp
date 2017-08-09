@@ -1,6 +1,6 @@
 using System;
 using System.Text.RegularExpressions;
-using System.Web.UI;
+
 using SelfishHttp.Params.Matching;
 
 namespace SelfishHttp
@@ -10,9 +10,7 @@ namespace SelfishHttp
         public static IStringParamMatch AnyOf(params string[] values)
         {
             if (values == null || values.Length == 0)
-            {
                 throw new ArgumentException("Cannot be null or an empty array", "values");
-            }
 
             return new AnyOfMatch(values);
         }
@@ -20,9 +18,7 @@ namespace SelfishHttp
         public static IStringParamMatch AllOf(params string[] values)
         {
             if (values == null || values.Length == 0)
-            {
                 throw new ArgumentException("Cannot be null or an empty array", "values");
-            }
 
             return new AllOfMatch(values);
         }
@@ -60,9 +56,7 @@ namespace SelfishHttp
         public static IParamMatch Like(Regex expression)
         {
             if (expression == null)
-            {
                 throw new ArgumentNullException("expression");
-            }
 
             return new RegexMatch(expression);
         }
@@ -70,9 +64,7 @@ namespace SelfishHttp
         public static IParamMatch Equal(Func<string, bool> callback)
         {
             if (callback == null)
-            {
                 throw new ArgumentNullException("callback");
-            }
 
             return new CallbackMatch(callback);
         }
@@ -80,9 +72,7 @@ namespace SelfishHttp
         public static IParamMatch Custom(IParamMatch match)
         {
             if (match == null)
-            {
                 throw new ArgumentNullException("match");
-            }
 
             return match;
         }

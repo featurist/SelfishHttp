@@ -4,7 +4,7 @@ using System.Web;
 
 namespace SelfishHttp.Params
 {
-    class UrlParamsParser : IParamsParser
+    internal class UrlParamsParser : IParamsParser
     {
         public NameValueCollection ParseParams(HttpListenerRequest request)
         {

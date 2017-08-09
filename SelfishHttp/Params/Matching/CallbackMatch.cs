@@ -10,9 +10,8 @@ namespace SelfishHttp.Params.Matching
         public CallbackMatch(Func<string, bool> callback)
         {
             if (callback == null)
-            {
                 throw new ArgumentNullException("callback");
-            }
+
             _callback = callback;
         }
 
