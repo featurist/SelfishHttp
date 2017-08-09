@@ -10,15 +10,14 @@ namespace SelfishHttp
 {
     public class HttpResourceHandler : IHttpResourceHandler
     {
-        private readonly IDictionary<string, IParamMatch> _paramsMatches;
-        private StringComparer _comparer;
-        private StringComparison _comparison;
         private readonly string _method;
+        private readonly IDictionary<string, IParamMatch> _paramsMatches;
         private readonly string _path;
         private readonly HttpHandler _pipeline;
+        private StringComparer _comparer;
+        private StringComparison _comparison;
 
-        public HttpResourceHandler(string method, string path, IDictionary<string, IParamMatch> paramsMatches,
-                                   IServerConfiguration serverConfiguration)
+        public HttpResourceHandler(string method, string path, IDictionary<string, IParamMatch> paramsMatches, IServerConfiguration serverConfiguration)
         {
             _method = method;
             _path = !path.EndsWith("/") ? path : path.Substring(0, path.Length - 1);
@@ -50,8 +49,8 @@ namespace SelfishHttp
         {
             var testPath = request.Url.AbsolutePath;
             return request.HttpMethod == _method &&
-                   string.Equals(!testPath.EndsWith("/") ? testPath : testPath.Substring(0, testPath.Length - 1), _path,
-                                 _comparison) && MatchParameters(request);
+                   string.Equals(!testPath.EndsWith("/") ? testPath : testPath.Substring(0, testPath.Length - 1), _path, _comparison) &&
+                   MatchParameters(request);
         }
 
         public IHttpResourceHandler IgnorePathCase()
@@ -72,21 +71,16 @@ namespace SelfishHttp
                 return true;
 
             var parameters = ServerConfiguration.ParamsParser.ParseParams(request);
-            var parameterKeys = parameters.Keys.Cast<string>()
-                                          .Select(k => !k.Contains('[') ? k : k.Substring(0, k.IndexOf('[')))
-                                          .Distinct().ToArray();
+            var parameterKeys = parameters.Keys.Cast<string>().Select(k => !k.Contains('[') ? k : k.Substring(0, k.IndexOf('['))).Distinct().ToArray();
             if (!parameterKeys.Any())
                 return false;
 
             var absentKeys = parameterKeys.Except(_paramsMatches.Keys, _comparer).ToArray();
-            if (absentKeys.Any() &&
-                !absentKeys.All(k => _paramsMatches.Any(kv => kv.Key.Equals(k, _comparison) && kv.Value.IsOptional)))
+            if (absentKeys.Any() && !absentKeys.All(k => _paramsMatches.Any(kv => kv.Key.Equals(k, _comparison) && kv.Value.IsOptional)))
                 return false;
 
             return _paramsMatches.Keys.Intersect(parameterKeys, _comparer)
-                                 .All(k => _paramsMatches
-                                          .First(kv => kv.Key.Equals(k, _comparison)).Value
-                                          .IsMatch(GetValues(parameters, k)));
+                                 .All(k => _paramsMatches.First(kv => kv.Key.Equals(k, _comparison)).Value.IsMatch(GetValues(parameters, k)));
         }
 
         private string[] GetValues(NameValueCollection parameters, string key)
@@ -95,10 +89,7 @@ namespace SelfishHttp
             if (keys.Any(k => k.Equals(key)))
                 return parameters.GetValues(key);
 
-            return keys
-                .Where(k => k.Length > key.Length + 1 && k.Substring(key.Length, 1).Equals("["))
-                .SelectMany(parameters.GetValues)
-                .ToArray();
+            return keys.Where(k => k.Length > key.Length + 1 && k.Substring(key.Length, 1).Equals("[")).SelectMany(parameters.GetValues).ToArray();
         }
     }
 }

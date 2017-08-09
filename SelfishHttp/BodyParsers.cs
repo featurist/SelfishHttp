@@ -6,16 +6,14 @@ namespace SelfishHttp
 {
     public class BodyParsers : IBodyParser
     {
-        private readonly Dictionary<Type, Func<Stream, object>> _bodyParsers =
-            new Dictionary<Type, Func<Stream, object>>();
+        private readonly Dictionary<Type, Func<Stream, object>> _bodyParsers = new Dictionary<Type, Func<Stream, object>>();
 
         public object ParseBody<T>(Stream stream)
         {
-            Func<Stream, object> parser;
-            if (_bodyParsers.TryGetValue(typeof(T), out parser))
+            if (_bodyParsers.TryGetValue(typeof(T), out Func<Stream, object> parser))
                 return parser(stream);
 
-            throw new ApplicationException(string.Format("could not convert body to type {0}", typeof(T)));
+            throw new ApplicationException($"could not convert body to type {typeof(T)}");
         }
 
         public void RegisterBodyParser<T>(Func<Stream, T> bodyParser)

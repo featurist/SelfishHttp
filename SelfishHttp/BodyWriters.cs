@@ -15,7 +15,7 @@ namespace SelfishHttp
             if (writeBody != null)
                 writeBody(o, stream);
             else
-                throw new ApplicationException(string.Format("could not convert body of type {0}", o.GetType()));
+                throw new ApplicationException($"could not convert body of type {o.GetType()}");
         }
 
         public void RegisterBodyWriter<T>(Action<T, Stream> writeBody)
@@ -40,7 +40,7 @@ namespace SelfishHttp
         private Action<object, Stream> FindWriterForType(Type type)
         {
             var writer = _bodyWriters.FirstOrDefault(typeWriter => typeWriter.Type.IsAssignableFrom(type));
-            return writer != null ? writer.Writer : null;
+            return writer?.Writer;
         }
 
         public class TypeWriter

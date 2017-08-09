@@ -97,11 +97,9 @@ namespace SelfishHttp.Test
         [Test]
         public void ShouldHonourIgnoreParameterCaseAndReturnCorrectResource()
         {
-            _server.OnGet("/stuff", new {TheKey = "k1", theOTHERkey = "k2"}).IgnoreParameterCase()
-                   .RespondWith("yes, this is stuff");
+            _server.OnGet("/stuff", new {TheKey = "k1", theOTHERkey = "k2"}).IgnoreParameterCase().RespondWith("yes, this is stuff");
             var client = new HttpClient();
-            var response = client.GetAsync(Url("/stuff?thekey=k1&theotherkey=k2")).Result.Content.ReadAsStringAsync()
-                                 .Result;
+            var response = client.GetAsync(Url("/stuff?thekey=k1&theotherkey=k2")).Result.Content.ReadAsStringAsync().Result;
             Assert.That(response, Is.EqualTo("yes, this is stuff"));
         }
 
@@ -111,14 +109,10 @@ namespace SelfishHttp.Test
             _server.OnGet("/stuff").RespondWith("yes, tc1");
             _server.OnGet("/other/").RespondWith("yes, tc2");
             var client = new HttpClient();
-            Assert.That(client.GetAsync(Url("/stuff")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc1"));
-            Assert.That(client.GetAsync(Url("/stuff/")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc1"));
-            Assert.That(client.GetAsync(Url("/other")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc2"));
-            Assert.That(client.GetAsync(Url("/other/")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc2"));
+            Assert.That(client.GetAsync(Url("/stuff")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc1"));
+            Assert.That(client.GetAsync(Url("/stuff/")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc1"));
+            Assert.That(client.GetAsync(Url("/other")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc2"));
+            Assert.That(client.GetAsync(Url("/other/")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc2"));
         }
 
         [Test]
@@ -126,42 +120,24 @@ namespace SelfishHttp.Test
         {
             _server.OnGet("/stuff").RespondWith("yes, tc1");
             var client = new HttpClient();
-            Assert.That(client.GetAsync(Url("/stuff")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc1"));
-            Assert.That(client.GetAsync(Url("/stuff?p=1")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc1"));
-            Assert.That(client.GetAsync(Url("/stuff?p=(2%2b4)*10%3d60")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc1"));
-            Assert.That(client.GetAsync(Url("/stuff?p=2")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc1"));
-            Assert.That(client.GetAsync(Url("/stuff?p=3&p=4")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc1"));
-            Assert.That(client.GetAsync(Url("/stuff?p=5&p=7")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc1"));
-            Assert.That(client.GetAsync(Url("/stuff?p=91")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc1"));
-            Assert.That(client.GetAsync(Url("/stuff?p=99")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc1"));
-            Assert.That(client.GetAsync(Url("/stuff?i=-123")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc1"));
-            Assert.That(client.GetAsync(Url("/stuff?j=2")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc1"));
-            Assert.That(client.GetAsync(Url("/stuff?k=1")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc1"));
-            Assert.That(client.GetAsync(Url("/stuff?m=-2")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc1"));
-            Assert.That(client.GetAsync(Url("/stuff?g=-1")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc1"));
-            Assert.That(client.GetAsync(Url("/stuff?id=901")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc1"));
-            Assert.That(client.GetAsync(Url("/stuff?id=901&myKey=Yes")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc1"));
-            Assert.That(client.GetAsync(Url("/stuff?id=902")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc1"));
-            Assert.That(client.GetAsync(Url("/stuff?id=902&myKey=Yes")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc1"));
-            Assert.That(client.GetAsync(Url("/stuff?id=902&myKey=yes")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc1"));
+            Assert.That(client.GetAsync(Url("/stuff")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc1"));
+            Assert.That(client.GetAsync(Url("/stuff?p=1")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc1"));
+            Assert.That(client.GetAsync(Url("/stuff?p=(2%2b4)*10%3d60")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc1"));
+            Assert.That(client.GetAsync(Url("/stuff?p=2")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc1"));
+            Assert.That(client.GetAsync(Url("/stuff?p=3&p=4")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc1"));
+            Assert.That(client.GetAsync(Url("/stuff?p=5&p=7")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc1"));
+            Assert.That(client.GetAsync(Url("/stuff?p=91")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc1"));
+            Assert.That(client.GetAsync(Url("/stuff?p=99")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc1"));
+            Assert.That(client.GetAsync(Url("/stuff?i=-123")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc1"));
+            Assert.That(client.GetAsync(Url("/stuff?j=2")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc1"));
+            Assert.That(client.GetAsync(Url("/stuff?k=1")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc1"));
+            Assert.That(client.GetAsync(Url("/stuff?m=-2")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc1"));
+            Assert.That(client.GetAsync(Url("/stuff?g=-1")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc1"));
+            Assert.That(client.GetAsync(Url("/stuff?id=901")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc1"));
+            Assert.That(client.GetAsync(Url("/stuff?id=901&myKey=Yes")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc1"));
+            Assert.That(client.GetAsync(Url("/stuff?id=902")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc1"));
+            Assert.That(client.GetAsync(Url("/stuff?id=902&myKey=Yes")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc1"));
+            Assert.That(client.GetAsync(Url("/stuff?id=902&myKey=yes")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc1"));
         }
 
         [Test]
@@ -171,16 +147,11 @@ namespace SelfishHttp.Test
             _server.OnGet("/stuff", new {p = ParamIs.AllOf("2", "3", "4")}).RespondWith("yes, tc2");
             _server.OnGet("/stuff", new {p = ParamIs.AnyOf("6", "7", "8", "9")}).RespondWith("yes, tc3");
             var client = new HttpClient();
-            Assert.That(client.GetAsync(Url("/stuff")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc1"));
-            Assert.That(client.GetAsync(Url("/stuff?p[]=2&p[]=3&p[]=4")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc2"));
-            Assert.That(client.GetAsync(Url("/stuff?p[]=6&p[]=7&p[]=8")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc3"));
-            Assert.That(client.GetAsync(Url("/stuff?p[0]=2&p[1]=3&p[2]=4")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc2"));
-            Assert.That(client.GetAsync(Url("/stuff?p[0]=6&p[1]=7&p[2]=8")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc3"));
+            Assert.That(client.GetAsync(Url("/stuff")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc1"));
+            Assert.That(client.GetAsync(Url("/stuff?p[]=2&p[]=3&p[]=4")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc2"));
+            Assert.That(client.GetAsync(Url("/stuff?p[]=6&p[]=7&p[]=8")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc3"));
+            Assert.That(client.GetAsync(Url("/stuff?p[0]=2&p[1]=3&p[2]=4")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc2"));
+            Assert.That(client.GetAsync(Url("/stuff?p[0]=6&p[1]=7&p[2]=8")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc3"));
         }
 
         [Test]
@@ -200,55 +171,31 @@ namespace SelfishHttp.Test
             _server.OnGet("/stuff", new {m = ParamIs.Int().LessThanZero()}).RespondWith("yes, tc12");
             _server.OnGet("/stuff", new {g = ParamIs.Int().LessThanOrEqualToZero()}).RespondWith("yes, tc13");
             _server.OnGet("/stuff", new {id = 901, myKey = ParamIs.Equal("Yes").Optional()}).RespondWith("yes, tc101");
-            _server.OnGet("/stuff", new {id = 902, myKey = ParamIs.Equal("Yes").Optional().IgnoreCase()})
-                   .RespondWith("yes, tc102");
+            _server.OnGet("/stuff", new {id = 902, myKey = ParamIs.Equal("Yes").Optional().IgnoreCase()}).RespondWith("yes, tc102");
             var client = new HttpClient();
-            Assert.That(client.GetAsync(Url("/stuff")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc1"));
-            Assert.That(client.GetAsync(Url("/stuff?p=1")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc2"));
-            Assert.That(client.GetAsync(Url("/stuff?p=(2%2b4)*10%3d60")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc3"));
-            Assert.That(client.GetAsync(Url("/stuff?p=2")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc4"));
-            Assert.That(client.GetAsync(Url("/stuff?p=3&p=4")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc5"));
-            Assert.That(client.GetAsync(Url("/stuff?p=5&p=7")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc6"));
-            Assert.That(client.GetAsync(Url("/stuff?p=91")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc7"));
-            Assert.That(client.GetAsync(Url("/stuff?p=99")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc8"));
-            Assert.That(client.GetAsync(Url("/stuff?i=123")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc9"));
-            Assert.That(client.GetAsync(Url("/stuff?i=-123")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc9"));
-            Assert.That(client.GetAsync(Url("/stuff?j=1")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc10"));
-            Assert.That(client.GetAsync(Url("/stuff?j=2")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc10"));
-            Assert.That(client.GetAsync(Url("/stuff?k=0")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc11"));
-            Assert.That(client.GetAsync(Url("/stuff?k=1")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc11"));
-            Assert.That(client.GetAsync(Url("/stuff?m=-1")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc12"));
-            Assert.That(client.GetAsync(Url("/stuff?m=-2")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc12"));
-            Assert.That(client.GetAsync(Url("/stuff?g=0")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc13"));
-            Assert.That(client.GetAsync(Url("/stuff?g=-1")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc13"));
-            Assert.That(client.GetAsync(Url("/stuff?id=901")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc101"));
-            Assert.That(client.GetAsync(Url("/stuff?id=901&myKey=Yes")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc101"));
-            Assert.That(client.GetAsync(Url("/stuff?id=902")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc102"));
-            Assert.That(client.GetAsync(Url("/stuff?id=902&myKey=Yes")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc102"));
-            Assert.That(client.GetAsync(Url("/stuff?id=902&myKey=yes")).Result.Content.ReadAsStringAsync().Result,
-                        Is.EqualTo("yes, tc102"));
+            Assert.That(client.GetAsync(Url("/stuff")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc1"));
+            Assert.That(client.GetAsync(Url("/stuff?p=1")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc2"));
+            Assert.That(client.GetAsync(Url("/stuff?p=(2%2b4)*10%3d60")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc3"));
+            Assert.That(client.GetAsync(Url("/stuff?p=2")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc4"));
+            Assert.That(client.GetAsync(Url("/stuff?p=3&p=4")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc5"));
+            Assert.That(client.GetAsync(Url("/stuff?p=5&p=7")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc6"));
+            Assert.That(client.GetAsync(Url("/stuff?p=91")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc7"));
+            Assert.That(client.GetAsync(Url("/stuff?p=99")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc8"));
+            Assert.That(client.GetAsync(Url("/stuff?i=123")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc9"));
+            Assert.That(client.GetAsync(Url("/stuff?i=-123")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc9"));
+            Assert.That(client.GetAsync(Url("/stuff?j=1")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc10"));
+            Assert.That(client.GetAsync(Url("/stuff?j=2")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc10"));
+            Assert.That(client.GetAsync(Url("/stuff?k=0")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc11"));
+            Assert.That(client.GetAsync(Url("/stuff?k=1")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc11"));
+            Assert.That(client.GetAsync(Url("/stuff?m=-1")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc12"));
+            Assert.That(client.GetAsync(Url("/stuff?m=-2")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc12"));
+            Assert.That(client.GetAsync(Url("/stuff?g=0")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc13"));
+            Assert.That(client.GetAsync(Url("/stuff?g=-1")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc13"));
+            Assert.That(client.GetAsync(Url("/stuff?id=901")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc101"));
+            Assert.That(client.GetAsync(Url("/stuff?id=901&myKey=Yes")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc101"));
+            Assert.That(client.GetAsync(Url("/stuff?id=902")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc102"));
+            Assert.That(client.GetAsync(Url("/stuff?id=902&myKey=Yes")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc102"));
+            Assert.That(client.GetAsync(Url("/stuff?id=902&myKey=yes")).Result.Content.ReadAsStringAsync().Result, Is.EqualTo("yes, tc102"));
         }
 
         [Test]
@@ -329,8 +276,7 @@ namespace SelfishHttp.Test
         {
             _server.OnPut("/putsomethinghere").Respond((req, res) => { res.Body = req.BodyAs<Stream>(); });
             var client = new HttpClient();
-            var response = client.PutAsync(Url("/putsomethinghere"), new StringContent("something to put")).Result
-                                 .Content.ReadAsStringAsync().Result;
+            var response = client.PutAsync(Url("/putsomethinghere"), new StringContent("something to put")).Result.Content.ReadAsStringAsync().Result;
             Assert.That(response, Is.EqualTo("something to put"));
         }
 
@@ -339,10 +285,7 @@ namespace SelfishHttp.Test
         {
             _server.OnPatch("/sendmeapatch").Respond((req, res) => { res.StatusCode = 204; });
             var client = new HttpClient();
-            var message = new HttpRequestMessage(new HttpMethod("PATCH"), Url("/sendmeapatch"))
-            {
-                Content = new StringContent("my patch")
-            };
+            var message = new HttpRequestMessage(new HttpMethod("PATCH"), Url("/sendmeapatch")) {Content = new StringContent("my patch")};
             var response = client.SendAsync(message).Result;
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NoContent));
         }
@@ -352,8 +295,7 @@ namespace SelfishHttp.Test
         {
             _server.OnPost("/postsomethinghere").Respond((req, res) => { res.Body = req.BodyAs<Stream>(); });
             var client = new HttpClient();
-            var response = client.PostAsync(Url("/postsomethinghere"), new StringContent("something to post")).Result
-                                 .Content.ReadAsStringAsync().Result;
+            var response = client.PostAsync(Url("/postsomethinghere"), new StringContent("something to post")).Result.Content.ReadAsStringAsync().Result;
             Assert.That(response, Is.EqualTo("something to post"));
         }
 
@@ -422,11 +364,7 @@ namespace SelfishHttp.Test
         [Test]
         public void CanRespondToHeadRequest()
         {
-            _server.OnHead("/head").Respond((req, res) =>
-            {
-                res.Headers["X-Head-Received"] =
-                    req.Method == "HEAD" ? "true" : "false";
-            });
+            _server.OnHead("/head").Respond((req, res) => { res.Headers["X-Head-Received"] = req.Method == "HEAD" ? "true" : "false"; });
             var client = new HttpClient();
             var message = new HttpRequestMessage(HttpMethod.Head, Url("/head"));
             var response = client.SendAsync(message).Result;
@@ -458,10 +396,7 @@ namespace SelfishHttp.Test
         [Test]
         public void ResponseBodyCanBeAStream()
         {
-            _server.OnGet("/get").Respond((req, res) =>
-            {
-                res.Body = new MemoryStream(Encoding.UTF8.GetBytes("hello"));
-            });
+            _server.OnGet("/get").Respond((req, res) => { res.Body = new MemoryStream(Encoding.UTF8.GetBytes("hello")); });
             var client = new HttpClient();
             var response = client.GetAsync(Url("/get")).Result;
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));

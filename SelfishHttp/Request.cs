@@ -7,7 +7,6 @@ namespace SelfishHttp
     {
         private readonly IBodyParser _bodyParser;
         private readonly HttpListenerRequest _request;
-        public CookieCollection Cookies { get; set; }
 
         public Request(IServerConfiguration serverConfig, HttpListenerRequest request)
         {
@@ -20,9 +19,14 @@ namespace SelfishHttp
             Cookies = _request.Cookies;
         }
 
+        public CookieCollection Cookies { get; }
+
         public string Url { get; }
+
         public string Method { get; }
+
         public WebHeaderCollection Headers { get; }
+
         public NameValueCollection Params { get; }
 
         public T BodyAs<T>()

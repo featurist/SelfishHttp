@@ -8,8 +8,7 @@ namespace SelfishHttp
             return handler.Respond((req, res, next) =>
             {
                 res.Headers["Access-Control-Allow-Origin"] = "*";
-                res.Headers["Access-Control-Allow-Headers"] =
-                    req.Headers["Access-Control-Request-Headers"];
+                res.Headers["Access-Control-Allow-Headers"] = req.Headers["Access-Control-Request-Headers"];
                 if (req.Method == "OPTIONS")
                 {
                 }

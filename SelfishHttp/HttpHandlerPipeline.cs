@@ -21,15 +21,16 @@ namespace SelfishHttp
         public void Handle(HttpListenerContext context, Action next)
         {
             var handlerEnumerator = _handlers.GetEnumerator();
-            Action handle = null;
-            handle = () =>
+
+            void Action()
             {
                 if (handlerEnumerator.MoveNext())
-                    handlerEnumerator.Current(context, () => handle());
+                    handlerEnumerator.Current(context, Action);
                 else
                     next();
-            };
-            handle();
+            }
+
+            Action();
         }
 
         public void AddHandler(Action<HttpListenerContext, Action> handler)

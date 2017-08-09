@@ -195,9 +195,7 @@ namespace SelfishHttp
                             IHttpResourceHandler handler;
                             lock (_locker)
                             {
-                                handler = _resourceHandlers
-                                              .Where(h => h.HasParameterMatching).FirstOrDefault(h => h.Matches(req)) ??
-                                          _resourceHandlers
+                                handler = _resourceHandlers.Where(h => h.HasParameterMatching).FirstOrDefault(h => h.Matches(req)) ?? _resourceHandlers
                                               .Where(h => !h.HasParameterMatching).FirstOrDefault(h => h.Matches(req));
                             }
                             if (handler != null)
