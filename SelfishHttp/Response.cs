@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.IO;
 using System.Net;
 
 namespace SelfishHttp
@@ -18,18 +15,15 @@ namespace SelfishHttp
 
         public int StatusCode
         {
-            get { return _response.StatusCode; }
-            set { _response.StatusCode = value; }
+            get => _response.StatusCode;
+            set => _response.StatusCode = value;
         }
 
-        public WebHeaderCollection Headers
-        {
-            get { return _response.Headers; }
-        }
+        public WebHeaderCollection Headers => _response.Headers;
 
         public object Body
         {
-            set { _bodyWriter.WriteBody(value ?? "", _response.OutputStream); }
+            set => _bodyWriter.WriteBody(value ?? "", _response.OutputStream);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\Microsoft.Net.Compilers.2.3.1\build\Microsoft.Net.Compilers.props" Condition="Exists('..\packages\Microsoft.Net.Compilers.2.3.1\build\Microsoft.Net.Compilers.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -10,25 +11,40 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SelfishHttp</RootNamespace>
     <AssemblyName>SelfishHttp</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>bin\Debug\$(TargetFrameworkVersion)\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <LangVersion>7</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>bin\Release\$(TargetFrameworkVersion)\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+    <DefineConstants>$(DefineConstants);NET40</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFrameworkVersion)' == 'v4.5'">
+    <DefineConstants>$(DefineConstants);NET45</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFrameworkVersion)' == 'v4.6'">
+    <DefineConstants>$(DefineConstants);NET46</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -44,15 +60,31 @@
     <Compile Include="BodyParsers.cs" />
     <Compile Include="BodyWriters.cs" />
     <Compile Include="CrossOriginRequestExtensions.cs" />
+    <Compile Include="RequestErrorEventArgs.cs" />
     <Compile Include="HttpHandlerPipeline.cs" />
     <Compile Include="IBodyParser.cs" />
     <Compile Include="IBodyWriter.cs" />
     <Compile Include="IHttpResourceHandler.cs" />
-    <Compile Include="IParamsParser.cs" />
+    <Compile Include="RequestEventArgs.cs" />
+    <Compile Include="Params\Matching\AllOfMatch.cs" />
+    <Compile Include="Params\Matching\AnythingMatch.cs" />
+    <Compile Include="Params\Matching\BaseParamMatch.cs" />
+    <Compile Include="Params\Matching\AnyOfMatch.cs" />
+    <Compile Include="Params\Matching\BaseStringParamMatch.cs" />
+    <Compile Include="Params\Matching\CallbackMatch.cs" />
+    <Compile Include="Params\Matching\EmptyMatch.cs" />
+    <Compile Include="Params\Matching\IIntParamMatch.cs" />
+    <Compile Include="Params\Matching\IntMatch.cs" />
+    <Compile Include="Params\Matching\StringMatch.cs" />
+    <Compile Include="Params\Matching\IParamMatch.cs" />
+    <Compile Include="Params\IParamsParser.cs" />
     <Compile Include="IRequest.cs" />
     <Compile Include="IResponse.cs" />
     <Compile Include="IServerConfiguration.cs" />
     <Compile Include="HttpResourceHandler.cs" />
+    <Compile Include="ParamIs.cs" />
+    <Compile Include="Params\Matching\IStringParamMatch.cs" />
+    <Compile Include="Params\Matching\RegexMatch.cs" />
     <Compile Include="ProxyHandlerExtensions.cs" />
     <Compile Include="RedirectHandlerExtensions.cs" />
     <Compile Include="Request.cs" />
@@ -63,9 +95,18 @@
     <Compile Include="Server.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StringHandlerExtensions.cs" />
-    <Compile Include="UrlParamsParser.cs" />
+    <Compile Include="Params\UrlParamsParser.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Microsoft.Net.Compilers.2.3.1\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Net.Compilers.2.3.1\build\Microsoft.Net.Compilers.props'))" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

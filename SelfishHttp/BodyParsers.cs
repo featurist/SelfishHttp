@@ -6,7 +6,15 @@ namespace SelfishHttp
 {
     public class BodyParsers : IBodyParser
     {
-        private Dictionary<Type, Func<Stream, object>> _bodyParsers = new Dictionary<Type, Func<Stream, object>>();
+        private readonly Dictionary<Type, Func<Stream, object>> _bodyParsers = new Dictionary<Type, Func<Stream, object>>();
+
+        public object ParseBody<T>(Stream stream)
+        {
+            if (_bodyParsers.TryGetValue(typeof(T), out Func<Stream, object> parser))
+                return parser(stream);
+
+            throw new ApplicationException($"could not convert body to type {typeof(T)}");
+        }
 
         public void RegisterBodyParser<T>(Func<Stream, T> bodyParser)
         {
@@ -18,26 +26,13 @@ namespace SelfishHttp
             var parsers = new BodyParsers();
             parsers.RegisterBodyParser(stream => stream);
             parsers.RegisterBodyParser(stream =>
-                                               {
-                                                   using (var streamReader = new StreamReader(stream))
-                                                   {
-                                                       return streamReader.ReadToEnd();
-                                                   }
-                                               });
-
+            {
+                using (var streamReader = new StreamReader(stream))
+                {
+                    return streamReader.ReadToEnd();
+                }
+            });
             return parsers;
-        }
-
-        public object ParseBody<T>(Stream stream)
-        {
-            Func<Stream, object> parser;
-            if (_bodyParsers.TryGetValue(typeof(T), out parser))
-            {
-                return parser(stream);
-            } else
-            {
-                throw new ApplicationException(string.Format("could not convert body to type {0}", typeof(T)));
-            }
         }
     }
 }

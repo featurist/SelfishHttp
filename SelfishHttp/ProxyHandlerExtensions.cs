@@ -1,43 +1,32 @@
 using System;
 using System.Collections.Specialized;
-using System.Linq;
-using System.IO;
 using System.Net;
 
 namespace SelfishHttp
 {
     public static class ProxyHandlerExtensions
     {
-        public static T ForwardTo<T>(this T handler, string url) where T : IHttpHandler
+        public static T ForwardTo<T>(this T handler, string url)
+            where T : IHttpHandler
         {
             handler.AddHandler((context, next) =>
-                                   {
-                                       var request = (HttpWebRequest) WebRequest.Create(new Uri(new Uri(url), context.Request.Url.PathAndQuery.TrimStart('/')));
-                                       request.Method = context.Request.HttpMethod;
+            {
+                var request = (HttpWebRequest) WebRequest.Create(new Uri(new Uri(url), context.Request.Url.PathAndQuery.TrimStart('/')));
+                request.Method = context.Request.HttpMethod;
+                CopyHeaders(context.Request.Headers, request);
+                if (request.Method == "POST" || request.Method == "PUT")
+                    context.Request.InputStream.CopyTo(request.GetRequestStream());
+                var response = GetReponse(request);
+                foreach (var header in response.Headers.AllKeys)
 
-                                       CopyHeaders(context.Request.Headers, request);
+                    // content-length breaks copying the body stream
+                    if (header.ToLower() != "content-length")
+                        context.Response.AddHeader(header, response.Headers[header]);
 
-                                       if (request.Method == "POST" || request.Method == "PUT")
-                                       {
-                                           context.Request.InputStream.CopyTo(request.GetRequestStream());
-                                       }
-
-                                       var response = GetReponse(request);
-                                       foreach (var header in response.Headers.AllKeys)
-                                       {
-                                           // content-length breaks copying the body stream
-                                           if (header.ToLower() != "content-length")
-                                           {
-                                               context.Response.AddHeader(header, response.Headers[header]);
-                                           }
-                                       }
-
-                                       next();
-
-                                       context.Response.StatusCode = (int) response.StatusCode;
-
-                                       response.GetResponseStream().CopyTo(context.Response.OutputStream);
-                                   });
+                next();
+                context.Response.StatusCode = (int) response.StatusCode;
+                response.GetResponseStream().CopyTo(context.Response.OutputStream);
+            });
             return handler;
         }
 
@@ -50,13 +39,9 @@ namespace SelfishHttp
             catch (WebException e)
             {
                 if (e.Response != null)
-                {
                     return (HttpWebResponse) e.Response;
-                }
-                else
-                {
-                    throw;
-                }
+
+                throw;
             }
         }
 
@@ -74,9 +59,7 @@ namespace SelfishHttp
                         if (value.ToLower() == "keep-alive")
                             request.KeepAlive = true;
                         else
-                        {
                             request.Connection = value;
-                        }
                         break;
                     case "content-length":
                         request.ContentLength = long.Parse(value);

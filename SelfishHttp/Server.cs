@@ -1,23 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 
+using SelfishHttp.Params;
+using SelfishHttp.Params.Matching;
+
 namespace SelfishHttp
 {
     public class Server : IDisposable, IServerConfiguration
     {
-        private readonly string _uriPrefix;
-        private readonly string _baseUri;
-        private HttpListener _listener;
         private readonly HttpHandler _anyRequestHandler;
-        private readonly List<IHttpResourceHandler> _resourceHandlers = new List<IHttpResourceHandler>();
+        private readonly object _locker = new object();
+        private readonly Stack<IHttpResourceHandler> _resourceHandlers = new Stack<IHttpResourceHandler>();
+        private readonly string _uriPrefix;
+        private HttpListener _listener;
 
-        public IBodyParser BodyParser { get; set; }
-        public IBodyWriter BodyWriter { get; set; }
-        public IParamsParser ParamsParser { get; set; }
+        public int Port { get; }
+
+        public string BaseUri { get; }
 
         public Server()
             : this(ChooseRandomUnusedPort())
@@ -26,8 +30,9 @@ namespace SelfishHttp
 
         public Server(int port)
         {
-            _uriPrefix = String.Format("http://localhost:{0}/", port);
-            _baseUri = string.Format("http://localhost:{0}/", port);
+            Port = port;
+            _uriPrefix = $"http://localhost:{port}/";
+            BaseUri = $"http://localhost:{port}/";
             BodyParser = BodyParsers.DefaultBodyParser();
             BodyWriter = BodyWriters.DefaultBodyWriter();
             ParamsParser = new UrlParamsParser();
@@ -35,44 +40,58 @@ namespace SelfishHttp
             Start();
         }
 
-        public string BaseUri
+        public void Dispose()
         {
-            get { return _baseUri; }
+            Stop();
         }
 
-        public IHttpResourceHandler OnGet(string path)
+        public IBodyParser BodyParser { get; set; }
+
+        public IBodyWriter BodyWriter { get; set; }
+
+        public IParamsParser ParamsParser { get; set; }
+
+        public event EventHandler<RequestEventArgs> RequestBegin;
+
+        public event EventHandler<RequestEventArgs> RequestEnd;
+
+        public event EventHandler<RequestEventArgs> RequestUnhandled;
+
+        public event EventHandler<RequestErrorEventArgs> RequestError;
+
+        public IHttpResourceHandler OnGet(string path, object parameters = null)
         {
-            return AddHttpHandler("GET", path);
+            return AddHttpHandler("GET", path, parameters);
         }
 
-        public IHttpResourceHandler OnHead(string path)
+        public IHttpResourceHandler OnHead(string path, object parameters = null)
         {
-            return AddHttpHandler("HEAD", path);
+            return AddHttpHandler("HEAD", path, parameters);
         }
 
-        public IHttpResourceHandler OnPut(string path)
+        public IHttpResourceHandler OnPut(string path, object parameters = null)
         {
-            return AddHttpHandler("PUT", path);
+            return AddHttpHandler("PUT", path, parameters);
         }
 
-        public IHttpResourceHandler OnPatch(string path)
+        public IHttpResourceHandler OnPatch(string path, object parameters = null)
         {
-            return AddHttpHandler("PATCH", path);
+            return AddHttpHandler("PATCH", path, parameters);
         }
 
-        public IHttpResourceHandler OnPost(string path)
+        public IHttpResourceHandler OnPost(string path, object parameters = null)
         {
-            return AddHttpHandler("POST", path);
+            return AddHttpHandler("POST", path, parameters);
         }
 
-        public IHttpResourceHandler OnDelete(string path)
+        public IHttpResourceHandler OnDelete(string path, object parameters = null)
         {
-            return AddHttpHandler("DELETE", path);
+            return AddHttpHandler("DELETE", path, parameters);
         }
 
-        public IHttpResourceHandler OnOptions(string path)
+        public IHttpResourceHandler OnOptions(string path, object parameters = null)
         {
-            return AddHttpHandler("OPTIONS", path);
+            return AddHttpHandler("OPTIONS", path, parameters);
         }
 
         public IHttpHandler OnRequest()
@@ -80,10 +99,34 @@ namespace SelfishHttp
             return _anyRequestHandler;
         }
 
-        private IHttpResourceHandler AddHttpHandler(string method, string path)
+        private IHttpResourceHandler AddHttpHandler(string method, string path, object parameters)
         {
-            var httpHandler = new HttpResourceHandler(method, path, this);
-            _resourceHandlers.Add(httpHandler);
+            IDictionary<string, IParamMatch> matches = null;
+            if (parameters != null)
+            {
+                matches = parameters as IDictionary<string, IParamMatch>;
+                if (matches != null)
+                {
+                    matches = matches.ToDictionary(kv => kv.Key, kv => kv.Value);
+                }
+                else
+                {
+                    matches = new Dictionary<string, IParamMatch>();
+                    var properties = TypeDescriptor.GetProperties(parameters);
+                    foreach (PropertyDescriptor property in properties)
+                    {
+                        var propVal = property.GetValue(parameters);
+                        var paramMatch = propVal as IParamMatch;
+                        matches[property.Name] = paramMatch ?? new StringMatch(Convert.ToString(propVal));
+                    }
+                }
+            }
+
+            var httpHandler = new HttpResourceHandler(method, path, matches, this);
+            lock (_locker)
+            {
+                _resourceHandlers.Push(httpHandler);
+            }
             return httpHandler;
         }
 
@@ -99,21 +142,34 @@ namespace SelfishHttp
         private AuthenticationSchemes AuthenticationSchemeSelectorDelegate(HttpListenerRequest httpRequest)
         {
             if (_anyRequestHandler.AuthenticationScheme.HasValue)
-            {
                 return _anyRequestHandler.AuthenticationScheme.Value;
-            }
 
             var handler = _resourceHandlers.FirstOrDefault(h => h.Matches(httpRequest));
             if (handler != null && handler.AuthenticationScheme.HasValue)
-            {
                 return handler.AuthenticationScheme.Value;
-            }
+
             return AuthenticationSchemes.Anonymous;
         }
 
         private void HandleNextRequest()
         {
             _listener.BeginGetContext(HandleRequest, null);
+        }
+
+        /// <summary>
+        ///     Clears this instance of any handlers registered by calls to <see cref="OnGet" />, <see cref="OnHead" />,
+        ///     <see cref="OnPut" />, <see cref="OnPatch" />, <see cref="OnPost" />, <see cref="OnDelete" /> or
+        ///     <see cref="OnOptions" />.
+        ///     In addition, any handlers registered to the <see cref="OnRequest" /> <see cref="HttpHandler" /> instance are
+        ///     cleared.
+        /// </summary>
+        public void Clear()
+        {
+            lock (_locker)
+            {
+                _resourceHandlers.Clear();
+                _anyRequestHandler.Clear();
+            }
         }
 
         public void Stop()
@@ -129,15 +185,19 @@ namespace SelfishHttp
                 if (_listener.IsListening)
                 {
                     HandleNextRequest();
-                    HttpListenerRequest req = context.Request;
-                    HttpListenerResponse res = context.Response;
-
+                    var req = context.Request;
+                    var res = context.Response;
                     try
                     {
+                        OnRequestBegin(new RequestEventArgs {Request = req, Response = res});
                         _anyRequestHandler.Handle(context, () =>
                         {
-                            var handler = _resourceHandlers.FirstOrDefault(h => h.Matches(req));
-
+                            IHttpResourceHandler handler;
+                            lock (_locker)
+                            {
+                                handler = _resourceHandlers.Where(h => h.HasParameterMatching).FirstOrDefault(h => h.Matches(req)) ?? _resourceHandlers
+                                              .Where(h => !h.HasParameterMatching).FirstOrDefault(h => h.Matches(req));
+                            }
                             if (handler != null)
                             {
                                 handler.Handle(context, () => { });
@@ -145,15 +205,17 @@ namespace SelfishHttp
                             else
                             {
                                 res.StatusCode = 404;
+                                OnRequestUnhandled(new RequestEventArgs {Request = req, Response = res});
                             }
+                            OnRequestEnd(new RequestEventArgs {Request = req, Response = res});
                         });
-
                         res.Close();
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine(ex);
                         res.StatusCode = 500;
+                        OnRequestError(new RequestErrorEventArgs {Exception = ex, Request = req, Response = res});
+                        Console.WriteLine(ex);
                         using (var output = new StreamWriter(res.OutputStream))
                         {
                             output.Write(ex);
@@ -165,9 +227,7 @@ namespace SelfishHttp
             catch (HttpListenerException e)
             {
                 if (!IsOperationAbortedOnStoppingServer(e))
-                {
                     throw;
-                }
             }
             catch (Exception e)
             {
@@ -176,28 +236,44 @@ namespace SelfishHttp
         }
 
         /// <summary>
-        /// Return true if the exception is: The I/O operation has been aborted because of either a thread exit or an application request.
-        /// Happens when we stop the server and the listening is cancelled.
+        ///     Return true if the exception is: The I/O operation has been aborted because of either a thread exit or an
+        ///     application request.
+        ///     Happens when we stop the server and the listening is cancelled.
         /// </summary>
-        /// <param name="e"></param>
-        /// <returns></returns>
+        /// <param name="e">The event argument.</param>
+        /// <returns><c>true</c> if operation is aborted on server; else, <c>false</c></returns>
         private static bool IsOperationAbortedOnStoppingServer(HttpListenerException e)
         {
             return e.NativeErrorCode == 0x000003E3;
-        }
-
-        public void Dispose()
-        {
-            Stop();
         }
 
         private static int ChooseRandomUnusedPort()
         {
             var listener = new TcpListener(IPAddress.Any, 0);
             listener.Start();
-            var port = ((IPEndPoint)listener.LocalEndpoint).Port;
+            var port = ((IPEndPoint) listener.LocalEndpoint).Port;
             listener.Stop();
             return port;
+        }
+
+        private void OnRequestUnhandled(RequestEventArgs e)
+        {
+            RequestUnhandled?.Invoke(this, e);
+        }
+
+        private void OnRequestError(RequestErrorEventArgs e)
+        {
+            RequestError?.Invoke(this, e);
+        }
+
+        private void OnRequestBegin(RequestEventArgs e)
+        {
+            RequestBegin?.Invoke(this, e);
+        }
+
+        private void OnRequestEnd(RequestEventArgs e)
+        {
+            RequestEnd?.Invoke(this, e);
         }
     }
 }

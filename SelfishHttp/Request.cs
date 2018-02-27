@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Net;
 
@@ -17,12 +16,18 @@ namespace SelfishHttp
             Method = request.HttpMethod;
             Headers = (WebHeaderCollection) request.Headers;
             Params = serverConfig.ParamsParser.ParseParams(_request);
+            Cookies = _request.Cookies;
         }
 
-        public string Url { get; private set; }
-        public string Method { get; private set; }
-        public WebHeaderCollection Headers { get; private set; }
-        public NameValueCollection Params { get; private set; }
+        public CookieCollection Cookies { get; }
+
+        public string Url { get; }
+
+        public string Method { get; }
+
+        public WebHeaderCollection Headers { get; }
+
+        public NameValueCollection Params { get; }
 
         public T BodyAs<T>()
         {

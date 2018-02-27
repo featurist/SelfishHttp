@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http;
+
 using NUnit.Framework;
 
 namespace SelfishHttp.Test
@@ -10,11 +11,7 @@ namespace SelfishHttp.Test
         [Test]
         public void HandlerCanAccessUrlEncodedParameters()
         {
-            _server.OnGet("/params").Respond((req, res) =>
-                                                 {
-                                                     res.Body = req.Params["colour"];
-                                                 });
-
+            _server.OnGet("/params").Respond((req, res) => { res.Body = req.Params["colour"]; });
             var client = new HttpClient();
             var response = client.GetAsync(Url("/params?colour=crimson")).Result;
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));

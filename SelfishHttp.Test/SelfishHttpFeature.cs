@@ -1,4 +1,5 @@
 using System;
+
 using NUnit.Framework;
 
 namespace SelfishHttp.Test
@@ -11,13 +12,13 @@ namespace SelfishHttp.Test
         [SetUp]
         public void SetUp()
         {
-            int port = 12345;
+            var port = 12345;
             _server = new Server(port);
         }
 
         public string Url(string path)
         {
-            return new Uri(new Uri(_server.BaseUri), path).ToString();
+            return new Uri(new Uri(_server.BaseUri), path).AbsoluteUri;
         }
 
         [TearDown]

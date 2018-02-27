@@ -9,15 +9,18 @@ namespace SelfishHttp
     {
         private readonly List<TypeWriter> _bodyWriters = new List<TypeWriter>();
 
-        public void RegisterBodyWriter<T>(Action<T, Stream> writeBody)
+        public void WriteBody(object o, Stream stream)
         {
-            _bodyWriters.Insert(0, new TypeWriter { Type = typeof(T), Writer = (o, stream) => writeBody((T)o, stream) });
+            var writeBody = FindWriterForType(o.GetType());
+            if (writeBody != null)
+                writeBody(o, stream);
+            else
+                throw new ApplicationException($"could not convert body of type {o.GetType()}");
         }
 
-        public class TypeWriter
+        public void RegisterBodyWriter<T>(Action<T, Stream> writeBody)
         {
-            public Type Type;
-            public Action<object, Stream> Writer;
+            _bodyWriters.Insert(0, new TypeWriter {Type = typeof(T), Writer = (o, stream) => writeBody((T) o, stream)});
         }
 
         public static IBodyWriter DefaultBodyWriter()
@@ -25,33 +28,25 @@ namespace SelfishHttp
             var writer = new BodyWriters();
             writer.RegisterBodyWriter<Stream>((stream, outputStream) => stream.CopyTo(outputStream));
             writer.RegisterBodyWriter<string>((str, outputStream) =>
-                                                  {
-                                                      using (var streamWriter = new StreamWriter(outputStream))
-                                                      {
-                                                          streamWriter.Write(str);
-                                                      }
-                                                  });
-
+            {
+                using (var streamWriter = new StreamWriter(outputStream))
+                {
+                    streamWriter.Write(str);
+                }
+            });
             return writer;
         }
 
-        public void WriteBody(object o, Stream stream)
+        private Action<object, Stream> FindWriterForType(Type type)
         {
-            var writeBody = FindWriterForType(o.GetType());
-
-            if (writeBody != null)
-            {
-                writeBody(o, stream);
-            } else
-            {
-                throw new ApplicationException(string.Format("could not convert body of type {0}", o.GetType()));
-            }
+            var writer = _bodyWriters.FirstOrDefault(typeWriter => typeWriter.Type.IsAssignableFrom(type));
+            return writer?.Writer;
         }
 
-        private Action<object,Stream> FindWriterForType(Type type)
+        public class TypeWriter
         {
-            TypeWriter writer = _bodyWriters.FirstOrDefault(typeWriter => typeWriter.Type.IsAssignableFrom(type));
-            return writer != null? writer.Writer: null;
+            public Type Type;
+            public Action<object, Stream> Writer;
         }
     }
 }
